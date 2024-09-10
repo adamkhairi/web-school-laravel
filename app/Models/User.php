@@ -6,8 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
@@ -32,6 +33,26 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
+    /**
+     * Get the JWT identifier.
+     *
+     * @return int
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the JWT custom claims.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return []; // You can add custom claims here if needed
+    }
     /**
      * Get the attributes that should be cast.
      *
