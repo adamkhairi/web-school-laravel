@@ -28,7 +28,7 @@ Route::prefix('auth')->group(function () {
 
 // Protected Routes (Require Authentication)
 Route::middleware('auth:sanctum')->group(function () {
-    // User Profile
+    // Current User Profile
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User Management
     Route::prefix('users')->group(function () {
+
         // CRUD Operations
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
