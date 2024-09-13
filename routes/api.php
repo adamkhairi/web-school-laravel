@@ -10,8 +10,10 @@ Route::prefix('auth')->group(function () {
     // User Authentication
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
+    });
 
     // Password Reset
     Route::post('/password/email', [AuthController::class, 'sendPasswordResetEmail'])->name('password.email');
@@ -33,7 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/token', [AuthController::class, 'respondWithToken'])->name('auth.token');
 
     // User Management
     Route::prefix('users')->group(function () {
@@ -58,6 +59,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [UserController::class, 'getUserStats']);
     });
 });
+
+// Admin Dashboard (Using role middleware)
+Route::get('/admin', function () {
+    // Admin only
+
+})->middleware('role:admin');
+
 
 // Protected Endpoint (Using auth:api middleware)
 Route::get('/protected-endpoint', [AuthController::class, 'protectedEndpoint'])->middleware('auth:api');
