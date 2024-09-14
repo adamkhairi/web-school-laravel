@@ -3,8 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use App\Enums\RoleType;
 
 class CheckRole
 {
@@ -13,7 +12,7 @@ class CheckRole
    *
    * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
    */
-  public function handle($request, Closure $next, $role)
+  public function handle($request, Closure $next, RoleType $role)
   {
     if (!$request->user() || !$request->user()->hasRole($role)) {
       abort(403, "Unauthorized action.");

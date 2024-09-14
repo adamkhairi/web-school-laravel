@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Enums\RoleType;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable, HasUuids;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    //, HasUuids;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +32,7 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'profile_picture',
         'status',
+        'role'
     ];
 
     /**
@@ -48,23 +51,16 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Role::class);
     }
 
-    public function hasRole($role)
+    public function hasRole(RoleType $role): bool
     {
-        if (is_string($role)) {
-            return $this->roles()->where('roles.name', $role)->exists();
-        }
-        return $this->roles()->where('roles.id', $role)->exists();
+        return $this->roles()->where('roles.name', $role->value)->exists();
     }
 
-
-    public function assignRole($role)
+    public function assignRole(RoleType $role): void
     {
-        if (is_string($role)) {
-            $role = Role::where('name', $role)->firstOrFail();
-        }
-
-        if (!$this->hasRole($role->id)) {
-            $this->roles()->attach($role->id);
+        if (!$this->hasRole($role)) {
+            $roleModel = Role::where('name', $role->value)->firstOrFail();
+            $this->roles()->attach($roleModel->id);
         }
     }
 
@@ -87,6 +83,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return []; // You can add custom claims here if needed
     }
+
     /**
      * Get the attributes that should be cast.
      *

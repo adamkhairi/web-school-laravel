@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Sanctum\PersonalAccessToken;
+use App\Enums\RoleType;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -288,5 +290,49 @@ class AuthController extends Controller
         $user->markEmailAsVerified();
 
         return response()->json(['message' => 'Email verified successfully'], 200);
+    }
+
+    /**
+     * Assign a role to a user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function assignRole(Request $request, User $user): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'role' => ['required', Rule::in(RoleType::values())],
+            ]);
+
+            $role = RoleType::from($validatedData['role']);
+
+            if (!$user->hasRole($role)) {
+                $user->assignRole($role);
+                return response()->json(['message' => 'Role assigned successfully'], 200);
+            } else {
+                return response()->json(['message' => 'User already has this role'], 200);
+            }
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Failed to assign role: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function removeRole(Request $request, User $user): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'role' => ['required', Rule::in(RoleType::values())],
+            ]);
+
+            $role = RoleType::from($validatedData['role']);
+
+            $user->roles()->detach(Role::where('name', $role->value)->firstOrFail()->id);
+
+            return response()->json(['message' => 'Role removed successfully'], 200);
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Failed to remove role: ' . $e->getMessage(), 500);
+        }
     }
 }

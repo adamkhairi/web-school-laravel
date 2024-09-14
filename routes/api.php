@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/admin', function () {
     // Admin only
 
-})->middleware('role:admin');
+})->middleware('role:Admin');
 
 
 // Protected Endpoint (Using auth:api middleware)

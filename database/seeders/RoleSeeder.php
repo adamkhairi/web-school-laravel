@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RoleType;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 
@@ -16,19 +17,19 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => 'Admin',
+                'name' => RoleType::Admin->value,
                 'description' => 'Administrator with full access',
             ],
             [
-                'name' => 'Teacher',
+                'name' => RoleType::Teacher->value,
                 'description' => 'Educator with access to classes and grades',
             ],
             [
-                'name' => 'Student',
+                'name' => RoleType::Student->value,
                 'description' => 'Learner with access to courses and assignments',
             ],
             [
-                'name' => 'Parent',
+                'name' => RoleType::Parent->value,
                 'description' => 'Guardian with limited access to student information',
             ],
         ];

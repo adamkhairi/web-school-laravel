@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -148,11 +149,13 @@ class UserController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'role' => 'required|exists:roles,name',
+                'role' => ['required', Rule::in(RoleType::values())],
             ]);
 
-            if (!$user->hasRole($validatedData['role'])) {
-                $user->assignRole($validatedData['role']);
+            $role = RoleType::from($validatedData['role']);
+
+            if (!$user->hasRole($role)) {
+                $user->assignRole($role);
                 return response()->json(['message' => 'Role assigned successfully'], 200);
             } else {
                 return response()->json(['message' => 'User already has this role'], 200);
@@ -166,10 +169,12 @@ class UserController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'role' => 'required|exists:roles,name',
+                'role' => ['required', Rule::in(RoleType::values())],
             ]);
 
-            $user->removeRole($validatedData['role']);
+            $role = RoleType::from($validatedData['role']);
+
+            $user->roles()->detach(Role::where('name', $role->value)->firstOrFail()->id);
 
             return response()->json(['message' => 'Role removed successfully'], 200);
         } catch (\Exception $e) {
