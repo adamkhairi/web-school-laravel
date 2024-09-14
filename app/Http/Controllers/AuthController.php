@@ -17,13 +17,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
-    // Error Handling and Validation
-    protected function sendFailedResponse($message, $status): JsonResponse
-    {
-        return response()->json(['error' => $message], $status);
-    }
 
-    // Rate Limiting
     public function login(Request $request): JsonResponse
     {
         $key = 'login_attempts_' . $request->ip();
@@ -35,27 +29,25 @@ class AuthController extends Controller
 
         try {
             $credentials = $request->validate([
-                'email' => 'required|email',
-                'password' => 'required|string',
+                'email' => ['required', 'email'],
+                'password' => ['required', 'string'],
             ]);
 
             if (Auth::attempt($credentials)) {
                 RateLimiter::clear($key);
                 $user = Auth::user();
+
+                // Revoke all existing tokens
+                $user->tokens()->delete();
+
+                // Create a new token
                 $token = $user->createToken('api-token')->plainTextToken;
 
                 return response()->json([
                     'token' => $token,
                     'token_type' => 'Bearer',
-                    'expires_in' => config('sanctum.expiration') * 60, // Convert minutes to seconds
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'email_verified_at' => $user->email_verified_at,
-                        'created_at' => $user->created_at,
-                        'updated_at' => $user->updated_at,
-                    ]
+                    'expires_in' => config('sanctum.expiration') * 60,
+                    'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
                 ], 200);
             }
 
@@ -63,20 +55,19 @@ class AuthController extends Controller
             return $this->sendFailedResponse('Invalid credentials', 401);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
-
         } catch (\Exception $e) {
+            report($e);
             return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
         }
     }
 
-    // Email Verification
     public function register(Request $request): JsonResponse
     {
         try {
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
             ]);
 
             $user = User::create([
@@ -85,16 +76,19 @@ class AuthController extends Controller
                 'password' => Hash::make($validatedData['password']),
             ]);
 
-            $token = JWTAuth::fromUser($user);
+            $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
                 'message' => 'User successfully registered',
-                'user' => $user,
+                'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
                 'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => config('sanctum.expiration') * 60,
             ], 201);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
         } catch (\Exception $e) {
+            report($e);
             return $this->sendFailedResponse('Failed to register user. Please try again.', 500);
         }
     }
@@ -234,12 +228,14 @@ class AuthController extends Controller
     // You can use tools like Swagger or Postman to document your API endpoints.
     // This typically involves creating a separate documentation file or using annotations in your code.
 
-    protected function respondWithToken($token): JsonResponse
+    public function respondWithToken($token): JsonResponse
     {
+        $user = auth()->user();
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => config('sanctum.expiration') * 60,
+            'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at'])
         ]);
     }
 
@@ -255,8 +251,27 @@ class AuthController extends Controller
 
     public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth()->refresh());
+        try {
+
+            $user = auth()->user();
+            if (!$user) {
+                return $this->sendFailedResponse('Unauthorized', 401);
+            }
+
+            // Revoke all tokens...
+            $user->tokens()->delete();
+
+            $newToken =  $user->createToken('api-token')->plainTextToken;
+            return $this->respondWithToken($newToken);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return $this->sendFailedResponse('Token is invalid', 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return $this->sendFailedResponse('Token has expired', 401);
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Token could not be parsed from the request', 401);
+        }
     }
+
 
     public function verifyEmail(Request $request): JsonResponse
     {
