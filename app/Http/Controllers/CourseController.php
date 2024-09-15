@@ -8,13 +8,22 @@ use Illuminate\Http\JsonResponse;
 
 class CourseController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $courses = Course::with('teacher')->paginate(15);
+            $query = Course::with('teacher');
+
+            // Search feature
+            if ($request->has('search') && $request->search != '') {
+                $searchTerm = $request->search;
+                $query->where('name', 'like', "%{$searchTerm}%")
+                      ->orWhere('description', 'like', "%{$searchTerm}%");
+            }
+
+            $courses = $query->paginate(15);
             return response()->json($courses);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch courses: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to fetch courses: ' . $e->getMessage(), 500);
         }
     }
 
@@ -23,7 +32,7 @@ class CourseController extends Controller
         try {
             return response()->json($course->load('teacher'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve course: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to retrieve course: ' . $e->getMessage(), 500);
         }
     }
 
@@ -42,7 +51,7 @@ class CourseController extends Controller
             $course = Course::create($validatedData);
             return response()->json($course, 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create course: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to create course: ' . $e->getMessage(), 500);
         }
     }
 
@@ -61,7 +70,7 @@ class CourseController extends Controller
             $course->update($validatedData);
             return response()->json($course);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update course: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to update course: ' . $e->getMessage(), 500);
         }
     }
 
@@ -71,7 +80,7 @@ class CourseController extends Controller
             $course->delete();
             return response()->json(null, 204);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete course: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to delete course: ' . $e->getMessage(), 500);
         }
     }
 }

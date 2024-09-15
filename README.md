@@ -9,15 +9,15 @@
 
 #### 1.1.1 User Management Module
 - [x] Implement user model with fields: id, username, email, password_hash, role, created_at, updated_at
-- [x] Develop user registration endpoint with email verification
+- [ ] Develop user registration endpoint with email verification
 - [x] Create login endpoint with JWT token generation
 - [ ] Implement password reset functionality
 - [x] Develop user profile CRUD operations
 - [ ] Implement role-based access control (RBAC)
 
 #### 1.1.2 Course Management Module
-- [ ] Create course model with fields: id, name, description, teacher_id, start_date, end_date, status (planned, active, completed), created_at, updated_at
-- [ ] Develop course CRUD operations
+- [x] Create course model with fields: id, name, description, teacher_id, start_date, end_date, status (planned, active, completed), created_at, updated_at
+- [x] Develop course CRUD operations
 - [ ] Implement course search and filtering functionality
 - [ ] Create enrollment system with student-course associations
 - [ ] Develop course material management (upload, organize, delete)

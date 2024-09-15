@@ -14,7 +14,7 @@ class StudyController extends Controller
             $classes = Study::with('course')->paginate(15);
             return response()->json($classes);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch classes: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to fetch classes: ' . $e->getMessage(), 500);
         }
     }
 
@@ -23,7 +23,7 @@ class StudyController extends Controller
         try {
             return response()->json($class->load('course'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve class: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to retrieve class: ' . $e->getMessage(), 500);
         }
     }
 
@@ -39,7 +39,7 @@ class StudyController extends Controller
             $class = Study::create($validatedData);
             return response()->json($class, 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create class: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to create class: ' . $e->getMessage(), 500);
         }
     }
 
@@ -55,7 +55,7 @@ class StudyController extends Controller
             $class->update($validatedData);
             return response()->json($class);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update class: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to update class: ' . $e->getMessage(), 500);
         }
     }
 
@@ -65,7 +65,7 @@ class StudyController extends Controller
             $class->delete();
             return response()->json(null, 204);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete class: ' . $e->getMessage()], 500);
+            return $this->sendFailedResponse('Failed to delete class: ' . $e->getMessage(), 500);
         }
     }
 }
