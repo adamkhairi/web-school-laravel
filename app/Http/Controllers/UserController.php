@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleType;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -13,6 +14,7 @@ use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Exception;
 
 class UserController extends Controller
 {
@@ -39,8 +41,8 @@ class UserController extends Controller
 
             $users = $query->with('roles')->paginate(15);
             return response()->json($users);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch users: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to fetch users: ' . $e->getMessage(), 500);
         }
     }
 
@@ -54,8 +56,8 @@ class UserController extends Controller
     {
         try {
             return response()->json($user);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve user: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to retrieve user: ' . $e->getMessage(), 500);
         }
     }
 
@@ -74,8 +76,8 @@ class UserController extends Controller
             $user = User::create($validatedData);
 
             return response()->json($user, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create user: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to create user: ' . $e->getMessage(), 500);
         }
     }
 
@@ -98,8 +100,8 @@ class UserController extends Controller
             $user->update($validatedData);
 
             return response()->json($user);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update user: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to update user: ' . $e->getMessage(), 500);
         }
     }
 
@@ -114,7 +116,7 @@ class UserController extends Controller
         try {
             $user->delete();
             return response()->json(null, 204);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to delete user: ' . $e->getMessage(), 500);
         }
     }
@@ -133,7 +135,7 @@ class UserController extends Controller
 
             $message = $user->is_active ? 'User activated' : 'User deactivated';
             return response()->json(['message' => $message], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to toggle user activation: ' . $e->getMessage(), 500);
         }
     }

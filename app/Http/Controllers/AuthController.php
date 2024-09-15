@@ -144,6 +144,33 @@ class AuthController extends Controller
         }
     }
 
+    public function user(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return $this->sendFailedResponse('User not authenticated.', 401);
+            }
+
+            $token = $request->bearerToken();
+
+            $userData = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+                'roles' => $user->roles->pluck('name'),
+                'token' => $token,
+            ];
+
+            return response()->json(['user' => $userData], 200);
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Failed to retrieve user data. Please try again.', 500);
+        }
+    }
+
     public function updateProfile(Request $request): JsonResponse
     {
         try {

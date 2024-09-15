@@ -1,1 +1,108 @@
-{"v":3,"name":"User Management","folders":[],"requests":[{"v":"7","auth":{"token":"1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210","authType":"inherit","authActive":true},"body":{"body":"{\n  \"user_id\": 1,\n  \"role\": \"Admin\"\n}","contentType":"application/json"},"name":"Assign Role to User","method":"POST","params":[],"headers":[{"key":"Accept","value":"application/json","active":true,"description":""}],"endpoint":"http://localhost:8000/api/users/1/assign-role","testScript":"","preRequestScript":"","requestVariables":[]},{"v":"7","auth":{"token":"1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210","authType":"inherit","authActive":true},"body":{"body":"\n","contentType":null},"name":"Get Users","method":"GET","params":[],"headers":[{"key":"Accept","value":"application/json","active":true,"description":""}],"endpoint":"http://localhost:8000/api/users/","testScript":"","preRequestScript":"","requestVariables":[]},{"v":"7","auth":{"token":"1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210","authType":"inherit","authActive":true},"body":{"body":"\n","contentType":null},"name":"Get User By Id","method":"GET","params":[],"headers":[{"key":"Accept","value":"application/json","active":true,"description":""}],"endpoint":"http://localhost:8000/api/users/2","testScript":"","preRequestScript":"","requestVariables":[]},{"v":"7","auth":{"token":"1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210","authType":"inherit","authActive":true},"body":{"body":"\n","contentType":null},"name":"Get User Activity","method":"GET","params":[],"headers":[{"key":"Accept","value":"application/json","active":true,"description":""}],"endpoint":"http://localhost:8000/api/users/1/activity","testScript":"","preRequestScript":"","requestVariables":[]}],"auth":{"authType":"inherit","authActive":true},"headers":[]}
+{
+    "v": 3,
+    "name": "User Management",
+    "folders": [],
+    "requests": [
+        {
+            "v": "7",
+            "auth": {
+                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
+                "authType": "inherit",
+                "authActive": true
+            },
+            "body": {
+                "body": "{\n  \"user_id\": 1,\n  \"role\": \"Admin\"\n}",
+                "contentType": "application/json"
+            },
+            "name": "Assign Role to User",
+            "method": "POST",
+            "params": [],
+            "headers": [
+                {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "active": true,
+                    "description": ""
+                }
+            ],
+            "endpoint": "http://localhost:8000/api/users/1/assign-role",
+            "testScript": "",
+            "preRequestScript": "",
+            "requestVariables": []
+        },
+        {
+            "v": "7",
+            "auth": {
+                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
+                "authType": "inherit",
+                "authActive": true
+            },
+            "body": { "body": "\n", "contentType": null },
+            "name": "Get Users",
+            "method": "GET",
+            "params": [],
+            "headers": [
+                {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "active": true,
+                    "description": ""
+                }
+            ],
+            "endpoint": "http://localhost:8000/api/users/",
+            "testScript": "",
+            "preRequestScript": "",
+            "requestVariables": []
+        },
+        {
+            "v": "7",
+            "auth": {
+                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
+                "authType": "inherit",
+                "authActive": true
+            },
+            "body": { "body": "\n", "contentType": null },
+            "name": "Get User By Id",
+            "method": "GET",
+            "params": [],
+            "headers": [
+                {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "active": true,
+                    "description": ""
+                }
+            ],
+            "endpoint": "http://localhost:8000/api/users/2",
+            "testScript": "",
+            "preRequestScript": "",
+            "requestVariables": []
+        },
+        {
+            "v": "7",
+            "auth": {
+                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
+                "authType": "inherit",
+                "authActive": true
+            },
+            "body": { "body": "\n", "contentType": null },
+            "name": "Get User Activity",
+            "method": "GET",
+            "params": [],
+            "headers": [
+                {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "active": true,
+                    "description": ""
+                }
+            ],
+            "endpoint": "http://localhost:8000/api/users/1/activity",
+            "testScript": "",
+            "preRequestScript": "",
+            "requestVariables": []
+        }
+    ],
+    "auth": { "authType": "inherit", "authActive": true },
+    "headers": []
+}

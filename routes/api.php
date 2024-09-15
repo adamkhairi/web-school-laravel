@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\StudyController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,62 +12,82 @@ Route::prefix('auth')->group(function () {
     // User Authentication
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-        Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
-    });
+
+    // User Profile
+    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+
+    // This route returns the authenticated user
+    Route::get('/user', [AuthController::class, 'user'])->name('auth.user')->middleware('auth:sanctum');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout')->middleware('auth:sanctum');
+    Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh')->middleware('auth:sanctum');
 
     // Password Reset
     Route::post('/password/email', [AuthController::class, 'sendPasswordResetEmail'])->name('password.email');
-    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.reset');
 
     // Two-Factor Authentication
-    Route::post('/two-factor-auth/enable', [AuthController::class, 'enableTwoFactorAuth'])->name('two-factor-auth.enable');
-    Route::post('/two-factor-auth/disable', [AuthController::class, 'disableTwoFactorAuth'])->name('two-factor-auth.disable');
-    Route::post('/two-factor-auth/verify', [AuthController::class, 'verifyTwoFactorAuth'])->name('two-factor-auth.verify');
+    Route::post('/two-factor-auth/enable', [AuthController::class, 'enableTwoFactorAuth'])->name('auth.two-factor.enable');
+    Route::post('/two-factor-auth/disable', [AuthController::class, 'disableTwoFactorAuth'])->name('auth.two-factor.disable');
+    Route::post('/two-factor-auth/verify', [AuthController::class, 'verifyTwoFactorAuth'])->name('auth.two-factor.verify');
 
     // Email Verification
-    Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+    Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 });
-
 // Protected Routes (Require Authentication)
 Route::middleware('auth:sanctum')->group(function () {
-    // Current User Profile
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
 
     // User Management
     Route::prefix('users')->group(function () {
-
         // CRUD Operations
-        Route::get('/', [UserController::class, 'index']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::get('/{user}', [UserController::class, 'show']);
-        Route::put('/{user}', [UserController::class, 'update']);
-        Route::delete('/{user}', [UserController::class, 'destroy']);
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::post('/', [UserController::class, 'store'])->name('users.store');
+        Route::get('/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         // User Actions
-        Route::post('/{user}/toggle-activation', [UserController::class, 'toggleActivation']);
-        Route::post('/{user}/assign-role', [UserController::class, 'assignRole']);
-        Route::post('/{user}/remove-role', [UserController::class, 'removeRole']);
-        Route::get('/{user}/activity', [UserController::class, 'getUserActivity']);
+        Route::post('/{user}/toggle-activation', [UserController::class, 'toggleActivation'])->name('users.toggleActivation');
+        Route::post('/{user}/assign-role', [UserController::class, 'assignRole'])->name('users.assignRole');
+        Route::post('/{user}/remove-role', [UserController::class, 'removeRole'])->name('users.removeRole');
+        Route::get('/{user}/activity', [UserController::class, 'getUserActivity'])->name('users.activity');
 
         // Bulk Operations
-        Route::post('/bulk-delete', [UserController::class, 'bulkDelete']);
+        Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulkDelete');
 
         // Reporting and Statistics
-        Route::get('/export', [UserController::class, 'exportUsers']);
-        Route::get('/stats', [UserController::class, 'getUserStats']);
+        Route::get('/export', [UserController::class, 'exportUsers'])->name('users.export');
+        Route::get('/stats', [UserController::class, 'getUserStats'])->name('users.stats');
+    });
+    // Course Management
+    Route::prefix('courses')->group(function () {
+        Route::get('/', [CourseController::class, 'index'])->name('courses.index');
+        Route::post('/', [CourseController::class, 'store'])->name('courses.store');
+        Route::get('/{course}', [CourseController::class, 'show'])->name('courses.show');
+        Route::put('/{course}', [CourseController::class, 'update'])->name('courses.update');
+        Route::delete('/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+    });
+
+    // Class Management
+    Route::prefix('classes')->group(function () {
+        Route::get('/', [StudyController::class, 'index'])->name('classes.index');
+        Route::post('/', [StudyController::class, 'store'])->name('classes.store');
+        Route::get('/{class}', [StudyController::class, 'show'])->name('classes.show');
+        Route::put('/{class}', [StudyController::class, 'update'])->name('classes.update');
+        Route::delete('/{class}', [StudyController::class, 'destroy'])->name('classes.destroy');
     });
 });
 
-// Admin Dashboard (Using role middleware)
-Route::get('/admin', function () {
-    // Admin only
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Admin routes
+});
 
-})->middleware('role:Admin');
+Route::middleware(['auth', 'role:teacher'])->group(function () {
+    // Teacher routes
+});
+
+Route::middleware(['auth', 'role:student'])->group(function () {
+    // Student routes
+});
 
 
 // Protected Endpoint (Using auth:api middleware)
