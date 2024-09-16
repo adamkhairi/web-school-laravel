@@ -78,7 +78,7 @@ class CourseController extends Controller
     {
         try {
             return response()->json($course->load('teacher'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to retrieve course: ' . $e->getMessage(), 500);
         }
     }
@@ -92,9 +92,12 @@ class CourseController extends Controller
                 'teacher_id' => 'required|exists:users,id',
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date',
-                'status' => 'required|string|in:' . implode(',', CourseStatus::values()),
+                'status' => 'nullable|string|in:' . implode(',', CourseStatus::values()),
                 'capacity' => 'required|integer|min:1',
             ]);
+
+            // Set default status to 'planned' if not provided
+            $validatedData['status'] = $validatedData['status'] ?? CourseStatus::Planned->value;
 
             $course = Course::create($validatedData);
             return response()->json($course, 201);
@@ -120,7 +123,7 @@ class CourseController extends Controller
 
             $course->update($validatedData);
             return response()->json($course);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to update course: ' . $e->getMessage(), 500);
         }
     }
@@ -130,7 +133,7 @@ class CourseController extends Controller
         try {
             $course->delete();
             return response()->json(null, 204);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to delete course: ' . $e->getMessage(), 500);
         }
     }
