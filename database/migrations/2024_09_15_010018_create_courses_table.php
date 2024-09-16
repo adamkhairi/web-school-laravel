@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\CourseStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,8 +19,9 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->enum('status', ['planned', 'active', 'completed'])->default('planned');
-            $table->timestamps();
+            $table->enum('status', CourseStatus::values())->default(CourseStatus::Planned->value);
+            $table->integer('capacity')->default(30);
+             $table->timestamps();
         });
     }
 

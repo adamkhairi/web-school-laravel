@@ -23,23 +23,55 @@ class UserController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
+     * 
+     * @example: GET /api/users?search=john&role=student&active=true&created_after=2023-01-01&created_before=2023-12-31&sort_by=name&sort_direction=asc&per_page=20
      */
     public function index(Request $request): JsonResponse
     {
         try {
             $query = User::query();
 
+            // Search by name, email, or phone number
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%$searchTerm%")
+                        ->orWhere('email', 'like', "%$searchTerm%")
+                        ->orWhere('first_name', 'like', "%$searchTerm%")
+                        ->orWhere('last_name', 'like', "%$searchTerm%")
+                        ->orWhere('phone_number', 'like', "%$searchTerm%");
+                });
+            }
+
+            // Filter by role
             if ($request->has('role')) {
                 $query->whereHas('roles', function ($q) use ($request) {
                     $q->where('name', $request->input('role'));
                 });
             }
 
+            // Filter by active status
             if ($request->has('active')) {
                 $query->where('is_active', $request->boolean('active'));
             }
 
-            $users = $query->with('roles')->paginate(15);
+            // Filter by creation date
+            if ($request->has('created_after')) {
+                $query->where('created_at', '>=', $request->input('created_after'));
+            }
+            if ($request->has('created_before')) {
+                $query->where('created_at', '<=', $request->input('created_before'));
+            }
+
+            // Sorting
+            $sortField = $request->input('sort_by', 'created_at');
+            $sortDirection = $request->input('sort_direction', 'desc');
+            $query->orderBy($sortField, $sortDirection);
+
+            // Pagination
+            $perPage = $request->input('per_page', 15);
+            $users = $query->with('roles')->paginate($perPage);
+
             return response()->json($users);
         } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to fetch users: ' . $e->getMessage(), 500);

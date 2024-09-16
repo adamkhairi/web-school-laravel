@@ -32,7 +32,7 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'profile_picture',
         'status',
-        'roles'
+        'cin'
     ];
 
     /**
@@ -48,12 +48,12 @@ class User extends Authenticatable implements JWTSubject
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
     }
 
     public function hasRole(RoleType $role): bool
     {
-        return $this->roles()->where('roles.name', $role->value)->exists();
+        return $this->roles()->where('name', $role->value)->exists();
     }
 
     public function assignRole(RoleType $role): void
@@ -62,6 +62,16 @@ class User extends Authenticatable implements JWTSubject
             $roleModel = Role::where('name', $role->value)->firstOrFail();
             $this->roles()->attach($roleModel->id);
         }
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    public function enrolledCourses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments')->withPivot('status')->withTimestamps();
     }
 
     /**

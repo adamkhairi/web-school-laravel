@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RoleType;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -11,30 +13,39 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
+        $adminRole = Role::where('name', RoleType::Admin)->first();
+        $teacherRole = Role::where('name', RoleType::Teacher)->first();
+        $studentRole = Role::where('name', RoleType::Student)->first();
+
         // Create an admin user
-        User::create([
+        $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@webschool.com',
             'password' => Hash::make('password'),
-            'role' => 'Admin',
         ]);
+        $admin->roles()->attach($adminRole);
 
         // Create a teacher user
-        User::create([
+        $teacher = User::create([
             'name' => 'Teacher User',
             'email' => 'teacher@webschool.com',
             'password' => Hash::make('password'),
-            'role' => 'Teacher',
         ]);
+        $teacher->roles()->attach($teacherRole);
 
         // Create a student user
-        User::create([
+        $student = User::create([
             'name' => 'Student User',
             'email' => 'student@webschool.com',
             'password' => Hash::make('password'),
-            'role' => 'Student',
         ]);
+        $student->roles()->attach($studentRole);
 
-        User::factory(25)->create();
+        // Create additional users with random roles
+        User::factory(25)->create()->each(function ($user) use ($adminRole, $teacherRole, $studentRole) {
+            $user->roles()->attach(
+                fake()->randomElement([$adminRole, $teacherRole, $studentRole])
+            );
+        });
     }
 }

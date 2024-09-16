@@ -1,108 +1,280 @@
 {
-    "v": 3,
-    "name": "User Management",
-    "folders": [],
-    "requests": [
+  "info": {
+    "name": "Course and Lesson Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Courses",
+      "item": [
         {
-            "v": "7",
-            "auth": {
-                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
-                "authType": "inherit",
-                "authActive": true
-            },
-            "body": {
-                "body": "{\n  \"user_id\": 1,\n  \"role\": \"Admin\"\n}",
-                "contentType": "application/json"
-            },
-            "name": "Assign Role to User",
+          "name": "List Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/courses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Course",
+          "request": {
             "method": "POST",
-            "params": [],
-            "headers": [
-                {
-                    "key": "Accept",
-                    "value": "application/json",
-                    "active": true,
-                    "description": ""
-                }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
             ],
-            "endpoint": "http://localhost:8000/api/users/1/assign-role",
-            "testScript": "",
-            "preRequestScript": "",
-            "requestVariables": []
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Introduction to Programming\",\n    \"description\": \"Learn the basics of programming\",\n    \"start_date\": \"2023-06-01\",\n    \"end_date\": \"2023-08-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"]
+            }
+          },
+          "response": []
         },
         {
-            "v": "7",
-            "auth": {
-                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
-                "authType": "inherit",
-                "authActive": true
-            },
-            "body": { "body": "\n", "contentType": null },
-            "name": "Get Users",
+          "name": "Show Course",
+          "request": {
             "method": "GET",
-            "params": [],
-            "headers": [
-                {
-                    "key": "Accept",
-                    "value": "application/json",
-                    "active": true,
-                    "description": ""
-                }
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
             ],
-            "endpoint": "http://localhost:8000/api/users/",
-            "testScript": "",
-            "preRequestScript": "",
-            "requestVariables": []
+            "url": {
+              "raw": "{{base_url}}/api/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1"]
+            }
+          },
+          "response": []
         },
         {
-            "v": "7",
-            "auth": {
-                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
-                "authType": "inherit",
-                "authActive": true
-            },
-            "body": { "body": "\n", "contentType": null },
-            "name": "Get User By Id",
-            "method": "GET",
-            "params": [],
-            "headers": [
-                {
-                    "key": "Accept",
-                    "value": "application/json",
-                    "active": true,
-                    "description": ""
-                }
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
             ],
-            "endpoint": "http://localhost:8000/api/users/2",
-            "testScript": "",
-            "preRequestScript": "",
-            "requestVariables": []
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Advanced Programming\",\n    \"description\": \"Dive deeper into programming concepts\",\n    \"start_date\": \"2023-07-01\",\n    \"end_date\": \"2023-09-30\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1"]
+            }
+          },
+          "response": []
         },
         {
-            "v": "7",
-            "auth": {
-                "token": "1|1UYWuRZz3roSzotcO6v58C79cNGJkAPL6CJ3wON751f58210",
-                "authType": "inherit",
-                "authActive": true
-            },
-            "body": { "body": "\n", "contentType": null },
-            "name": "Get User Activity",
-            "method": "GET",
-            "params": [],
-            "headers": [
-                {
-                    "key": "Accept",
-                    "value": "application/json",
-                    "active": true,
-                    "description": ""
-                }
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
             ],
-            "endpoint": "http://localhost:8000/api/users/1/activity",
-            "testScript": "",
-            "preRequestScript": "",
-            "requestVariables": []
+            "url": {
+              "raw": "{{base_url}}/api/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1"]
+            }
+          },
+          "response": []
         }
-    ],
-    "auth": { "authType": "inherit", "authActive": true },
-    "headers": []
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "List Lessons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/courses/1/lessons",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1", "lessons"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Variables and Data Types\",\n    \"content\": \"In this lesson, we'll cover variables and data types in programming.\",\n    \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses/1/lessons",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1", "lessons"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Variables, Data Types, and Operators\",\n    \"content\": \"In this lesson, we'll cover variables, data types, and basic operators in programming.\",\n    \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses/1/lessons/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1", "lessons", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/courses/1/lessons/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "1", "lessons", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "auth_token",
+      "value": "your_auth_token_here"
+    }
+  ]
 }

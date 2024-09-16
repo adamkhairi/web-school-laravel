@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
@@ -15,6 +14,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Enums\RoleType;
+use App\Exceptions\ApiException;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -278,28 +278,21 @@ class AuthController extends Controller
         }
     }
 
-    public function refresh(): JsonResponse
-    {
-        try {
+    public function refresh(Request $request)
+{
+    try {
+        $user = $request->user();
+        $user->tokens()->delete();
+        $token = $user->createToken('api_token')->plainTextToken;
 
-            $user = auth()->user();
-            if (!$user) {
-                return $this->sendFailedResponse('Unauthorized', 401);
-            }
-
-            // Revoke all tokens...
-            $user->tokens()->delete();
-
-            $newToken =  $user->createToken('api-token')->plainTextToken;
-            return $this->respondWithToken($newToken);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return $this->sendFailedResponse('Token is invalid', 401);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return $this->sendFailedResponse('Token has expired', 401);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Token could not be parsed from the request', 401);
-        }
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ]);
+    } catch (\Exception $e) {
+        throw new ApiException('Failed to refresh token', 401);
     }
+}
 
 
     public function verifyEmail(Request $request): JsonResponse

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->text('address')->nullable()->after('phone_number');
             $table->string('profile_picture')->nullable()->after('address');
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('profile_picture');
-            $table->string('role')->default(RoleType::Guest)->after('status');
+            $table->string('cin')->nullable()->after('status');
         });
     }
 
@@ -37,7 +37,7 @@ return new class extends Migration {
                 'address',
                 'profile_picture',
                 'status',
-                'role'
+                'cin'
             ]);
         });
     }

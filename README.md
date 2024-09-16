@@ -18,8 +18,8 @@
 #### 1.1.2 Course Management Module
 - [x] Create course model with fields: id, name, description, teacher_id, start_date, end_date, status (planned, active, completed), created_at, updated_at
 - [x] Develop course CRUD operations
-- [ ] Implement course search and filtering functionality
-- [ ] Create enrollment system with student-course associations
+- [x] Implement course search and filtering functionality
+- [x] Create enrollment system with student-course associations
 - [ ] Develop course material management (upload, organize, delete)
 - [ ] Implement course planning functionality for teachers
 - [ ] Add ability to create a course in "planned" status
