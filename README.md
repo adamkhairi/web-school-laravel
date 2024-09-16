@@ -2,17 +2,18 @@
 
 # Learning Management System - Roadmap - Detailed Development Focus
 
-`php artisan key:generate`
+  - Copy .env.example To .env
 
-`php artisan jwt:secret`
+  -
+      `php artisan key:generate`
 
-`php artisan migrate`
+      `php artisan jwt:secret`
 
-`php artisan migrate:fresh`
+      `php artisan migrate` OR `php artisan migrate:fresh`
 
-`php artisan db:seed`
+      `php artisan db:seed`
 
-`php artisan serve`
+      `php artisan serve`
 
 ## Phase 1: Backend Development (Weeks 1-8)
 
