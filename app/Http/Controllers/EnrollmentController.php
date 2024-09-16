@@ -76,7 +76,7 @@ class EnrollmentController extends Controller
 
         try {
             $validatedData = $request->validate([
-               'status' => ['required', Rule::in(EnrollmentStatus::values())],
+                'status' => ['required', Rule::in(EnrollmentStatus::values())],
             ]);
 
             $enrollment->update(['status' => EnrollmentStatus::from($validatedData['status'])]);

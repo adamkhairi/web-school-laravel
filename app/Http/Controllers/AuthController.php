@@ -15,46 +15,32 @@ use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Enums\RoleType;
 use App\Exceptions\ApiException;
+use App\Models\Role;
+use App\Services\AuthService;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
 
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function login(Request $request): JsonResponse
     {
-        $key = 'login_attempts_' . $request->ip();
-
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $seconds = RateLimiter::availableIn($key);
-            return $this->sendFailedResponse("Too many login attempts. Please try again in {$seconds} seconds.", 429);
-        }
-
         try {
             $credentials = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => ['required', 'string'],
             ]);
 
-            if (Auth::attempt($credentials)) {
-                RateLimiter::clear($key);
-                $user = Auth::user();
-
-                // Revoke all existing tokens
-                $user->tokens()->delete();
-
-                // Create a new token
-                $token = $user->createToken('api-token')->plainTextToken;
-
-                return response()->json([
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'expires_in' => config('sanctum.expiration') * 60,
-                    'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
-                ], 200);
-            }
-
-            RateLimiter::hit($key);
-            return $this->sendFailedResponse('Invalid credentials', 401);
+            $result = $this->authService->login($credentials);
+            return response()->json($result, 200);
+        } catch (ApiException $e) {
+            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
         } catch (\Exception $e) {
@@ -72,21 +58,8 @@ class AuthController extends Controller
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
             ]);
 
-            $user = User::create([
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'password' => Hash::make($validatedData['password']),
-            ]);
-
-            $token = $user->createToken('api-token')->plainTextToken;
-
-            return response()->json([
-                'message' => 'User successfully registered',
-                'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_in' => config('sanctum.expiration') * 60,
-            ], 201);
+            $result = $this->authService->register($validatedData);
+            return response()->json($result, 201);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
         } catch (\Exception $e) {
@@ -132,11 +105,8 @@ class AuthController extends Controller
     public function logout(): JsonResponse
     {
         try {
-            $token = JWTAuth::parseToken();
-            $token->invalidate();
-            auth()->logout();
-
-            return response()->json(['message' => 'Logged out successfully.'], 200);
+            $result = $this->authService->logout();
+            return response()->json($result, 200);
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return $this->sendFailedResponse('You are already logged out.', 401);
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
@@ -147,24 +117,7 @@ class AuthController extends Controller
     public function user(Request $request): JsonResponse
     {
         try {
-            $user = Auth::user();
-
-            if (!$user) {
-                return $this->sendFailedResponse('User not authenticated.', 401);
-            }
-
-            $token = $request->bearerToken();
-
-            $userData = [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-                'roles' => $user->roles->pluck('name'),
-                'token' => $token,
-            ];
-
+            $userData = $this->authService->getUserData();
             return response()->json(['user' => $userData], 200);
         } catch (\Exception $e) {
             return $this->sendFailedResponse('Failed to retrieve user data. Please try again.', 500);
@@ -174,20 +127,13 @@ class AuthController extends Controller
     public function updateProfile(Request $request): JsonResponse
     {
         try {
-            $user = Auth::user();
-
-            if (!$user) {
-                return $this->sendFailedResponse('User not authenticated.', 401);
-            }
-
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             ]);
 
-            $user->update($validatedData);
-
-            return response()->json(['message' => 'Profile updated successfully.', 'user' => $user], 200);
+            $result = $this->authService->updateProfile($validatedData);
+            return response()->json($result, 200);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
         } catch (\Exception $e) {
@@ -200,16 +146,12 @@ class AuthController extends Controller
     {
         try {
             $validatedData = $request->validate(['email' => 'required|email']);
-
-            $status = Password::sendResetLink($validatedData);
-
-            if ($status === Password::RESET_LINK_SENT) {
-                return response()->json(['message' => 'Password reset link sent to your email.'], 200);
-            } else {
-                return $this->sendFailedResponse('Failed to send password reset link. Please try again.', 400);
-            }
+            $result = $this->authService->sendPasswordResetEmail($validatedData['email']);
+            return response()->json($result, 200);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
             return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
         }
@@ -225,24 +167,12 @@ class AuthController extends Controller
                 'password' => 'required|min:8|confirmed',
             ]);
 
-            $status = Password::reset(
-                $validatedData,
-                function (User $user, string $password) {
-                    $user->forceFill([
-                        'password' => Hash::make($password)
-                    ])->setRememberToken(Str::random(60));
-
-                    $user->save();
-                }
-            );
-
-            if ($status === Password::PASSWORD_RESET) {
-                return response()->json(['message' => 'Password has been successfully reset.'], 200);
-            } else {
-                return $this->sendFailedResponse('Failed to reset password. Please try again.', 400);
-            }
+            $result = $this->authService->resetPassword($validatedData);
+            return response()->json($result, 200);
         } catch (ValidationException $e) {
             return $this->sendFailedResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
         } catch (\Exception $e) {
             return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
         }
@@ -279,27 +209,27 @@ class AuthController extends Controller
     }
 
     public function refresh(Request $request)
-{
-    try {
-        $user = $request->user();
-        $user->tokens()->delete();
-        $token = $user->createToken('api_token')->plainTextToken;
+    {
+        try {
+            $user = $request->user();
+            $user->tokens()->delete();
+            $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ]);
-    } catch (\Exception $e) {
-        throw new ApiException('Failed to refresh token', 401);
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ]);
+        } catch (\Exception $e) {
+            throw new ApiException('Failed to refresh token', 401);
+        }
     }
-}
 
 
     public function verifyEmail(Request $request): JsonResponse
     {
         $user = User::find($request->route('id'));
 
-        if (!hash_equals((string)$request->route('hash'), sha1($user->getEmailForVerification()))) {
+        if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
             return $this->sendFailedResponse('Invalid verification link', 400);
         }
 
