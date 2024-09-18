@@ -13,7 +13,6 @@ class SubmissionController extends Controller
     public function __construct(SubmissionServiceInterface $submissionService)
     {
         $this->submissionService = $submissionService;
-        $this->authorizeResource(Submission::class, 'submission');
     }
 
     public function index($assignmentId)

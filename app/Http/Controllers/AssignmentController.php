@@ -15,7 +15,6 @@ class AssignmentController extends Controller
     public function __construct(AssignmentServiceInterface $assignmentService)
     {
         $this->assignmentService = $assignmentService;
-        $this->authorizeResource(Assignment::class, 'assignment');
     }
 
     public function index(Request $request, $courseId): JsonResponse

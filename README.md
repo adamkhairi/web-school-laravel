@@ -31,7 +31,7 @@
 - [x] Create login endpoint with JWT token generation
 - [ ] Implement password reset functionality
 - [x] Develop user profile CRUD operations
-- [ ] Implement role-based access control (RBAC)
+- [x] Implement role-based access control (RBAC)
 
 #### 1.1.2 Course Management Module
 
@@ -39,7 +39,7 @@
 - [x] Develop course CRUD operations
 - [x] Implement course search and filtering functionality
 - [x] Create enrollment system with student-course associations
-- [ ] Develop course material management (upload, organize, delete)
+- [x] Develop course material management (upload, organize, delete)
 - [x] Implement course planning functionality for teachers
 - [x] Add ability to create a course in "planned" status
 - [x] Develop endpoints to update course details and status
@@ -54,8 +54,8 @@
 
 #### 1.1.4 Assignment and Grading System
 
-- [ ] Implement assignment model with fields: id, course_id, title, description, due_date, max_score, created_at, updated_at
-- [ ] Develop assignment CRUD operations
+- [x] Implement assignment model with fields: id, course_id, title, description, due_date, max_score, created_at, updated_at
+- [x] Develop assignment CRUD operations
 - [ ] Create submission model and implement submission process
 - [ ] Develop grading system with feedback functionality
 - [ ] Implement grade calculation and reporting

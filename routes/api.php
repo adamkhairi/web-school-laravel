@@ -195,6 +195,40 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // DELETE /api/materials/{material}
         Route::delete('/materials/{material}', [CourseMaterialController::class, 'destroy']);
+
+
+        // Assignments and Grading Management
+        // Routes accessible by both teachers and students
+        // GET /api/courses/{course}/assignments
+        Route::get('/{course}/assignments', [AssignmentController::class, 'index'])->can('viewAny', Assignment::class);
+
+        // Teacher-only routes
+        Route::middleware(['role:teacher'])->group(function () {
+            // POST /api/courses/{course}/assignments
+            // Example: {"title": "Homework 1", "description": "Complete exercises 1-5", "due_date": "2023-12-31"}
+            Route::post('/{course}/assignments', [AssignmentController::class, 'store'])->can('create', Assignment::class);
+
+            // PUT /api/assignments/{assignment}
+            // Example: {"title": "Updated Homework 1", "description": "Complete exercises 1-10", "due_date": "2024-01-15"}
+            Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->can('update', Assignment::class);
+
+            // DELETE /api/assignments/{assignment}
+            Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->can('delete', Assignment::class);
+
+            // GET /api/assignments/{assignment}/submissions
+            Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->can('viewSubmissions', Assignment::class);
+
+            // POST /api/submissions/{submission}/grade
+            // Example: {"grade": 95, "feedback": "Excellent work!"}
+            Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->can('grade', Assignment::class);
+        });
+
+        // Student-only routes
+        Route::middleware(['role:student'])->group(function () {
+            // POST /api/assignments/{assignment}/submit
+            // Example: {"content": "Here's my submission for Homework 1", "file": <file_upload>}
+            Route::post('/assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->can('submit', Assignment::class);
+        });
     });
 
     // Enrollment Management
@@ -220,38 +254,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/statistics/{course}', [EnrollmentController::class, 'getEnrollmentStatistics'])->name('enrollments.statistics');
     });
 
-    // Assignments and Grading Management
-    // Routes accessible by both teachers and students
-    // GET /api/courses/{course}/assignments
-    Route::get('/{course}/assignments', [AssignmentController::class, 'index'])->can('viewAny', Assignment::class);
-
-    // Teacher-only routes
-    Route::middleware(['role:teacher'])->group(function () {
-        // POST /api/courses/{course}/assignments
-        // Example: {"title": "Homework 1", "description": "Complete exercises 1-5", "due_date": "2023-12-31"}
-        Route::post('/{course}/assignments', [AssignmentController::class, 'store'])->can('create', Assignment::class);
-
-        // PUT /api/assignments/{assignment}
-        // Example: {"title": "Updated Homework 1", "description": "Complete exercises 1-10", "due_date": "2024-01-15"}
-        Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->can('update', Assignment::class);
-
-        // DELETE /api/assignments/{assignment}
-        Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->can('delete', Assignment::class);
-
-        // GET /api/assignments/{assignment}/submissions
-        Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->can('viewSubmissions', Assignment::class);
-
-        // POST /api/submissions/{submission}/grade
-        // Example: {"grade": 95, "feedback": "Excellent work!"}
-        Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->can('grade', Assignment::class);
-    });
-
-    // Student-only routes
-    Route::middleware(['role:student'])->group(function () {
-        // POST /api/assignments/{assignment}/submit
-        // Example: {"content": "Here's my submission for Homework 1", "file": <file_upload>}
-        Route::post('/assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->can('viewSubmissions', Assignment::class);
-    });
 });
 
 // Protected Endpoint (Using auth:api middleware)

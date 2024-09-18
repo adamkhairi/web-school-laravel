@@ -15,15 +15,16 @@ class Lesson extends Model
         'description',
         'content',
         'order',
-        'status',
     ];
 
-    protected $casts = [
-        'status' => LessonStatus::class,
-    ];
 
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function progress()
+    {
+        return $this->hasMany(Progress::class);
     }
 }

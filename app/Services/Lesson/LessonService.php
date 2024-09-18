@@ -5,6 +5,7 @@ namespace App\Services\Lesson;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Progress;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LessonService implements LessonServiceInterface
