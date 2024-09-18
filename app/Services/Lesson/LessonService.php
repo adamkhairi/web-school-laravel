@@ -4,6 +4,7 @@ namespace App\Services\Lesson;
 
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Models\Progress;
 use Illuminate\Http\Request;
 
 class LessonService implements LessonServiceInterface
@@ -55,5 +56,21 @@ class LessonService implements LessonServiceInterface
   public function deleteLesson(Lesson $lesson)
   {
     return $lesson->delete();
+  }
+
+  public function markLessonAsCompleted(User $user, Course $course, Lesson $lesson)
+  {
+    return Progress::updateOrCreate(
+      ['user_id' => $user->id, 'course_id' => $course->id, 'lesson_id' => $lesson->id],
+      ['completed' => true]
+    );
+  }
+
+  public function markLessonAsIncomplete(User $user, Course $course, Lesson $lesson)
+  {
+    return Progress::updateOrCreate(
+      ['user_id' => $user->id, 'course_id' => $course->id, 'lesson_id' => $lesson->id],
+      ['completed' => false]
+    );
   }
 }

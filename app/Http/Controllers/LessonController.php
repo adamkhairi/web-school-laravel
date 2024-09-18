@@ -80,4 +80,24 @@ class LessonController extends Controller
             return $this->sendFailedResponse('Failed to delete lesson: ' . $e->getMessage(), 500);
         }
     }
+
+    public function markAsCompleted(Request $request, Course $course, Lesson $lesson): JsonResponse
+    {
+        try {
+            $progress = $this->lessonService->markLessonAsCompleted($request->user(), $course, $lesson);
+            return response()->json($progress);
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Failed to mark lesson as completed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function markAsIncomplete(Request $request, Course $course, Lesson $lesson): JsonResponse
+    {
+        try {
+            $progress = $this->lessonService->markLessonAsIncomplete($request->user(), $course, $lesson);
+            return response()->json($progress);
+        } catch (\Exception $e) {
+            return $this->sendFailedResponse('Failed to mark lesson as incomplete: ' . $e->getMessage(), 500);
+        }
+    }
 }

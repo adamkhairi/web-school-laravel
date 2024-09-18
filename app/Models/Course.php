@@ -59,5 +59,15 @@ class Course extends Model
         return $this->hasMany(Assignment::class);
     }
 
-
+    public function progressPercentage(User $user)
+    {
+        $totalLessons = $this->lessons()->count();
+        $completedLessons = $this->lessons()
+            ->whereHas('progress', function ($query) use ($user) {
+                $query->where('user_id', $user->id)->where('completed', true);
+            })
+            ->count();
+    
+        return $totalLessons > 0 ? ($completedLessons / $totalLessons) * 100 : 0;
+    }
 }

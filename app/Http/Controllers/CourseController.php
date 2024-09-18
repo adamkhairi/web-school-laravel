@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\CourseStatus;
 use App\Models\Course;
 use App\Services\Course\CourseServiceInterface;
+use App\Services\Progress\ProgressServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -36,11 +37,21 @@ class CourseController extends Controller
         }
     }
 
-    public function show(Course $course): JsonResponse
+    public function show(Request $request, Course $course): JsonResponse
     {
         try {
             $course = $this->courseService->getCourse($course);
-            return response()->json($course);
+            $progress = null;
+            
+            if ($request->user()) {
+                $progressService = app(ProgressServiceInterface::class);
+                $progress = $progressService->getCourseProgress($request->user(), $course);
+            }
+            
+            return response()->json([
+                'course' => $course,
+                'progress' => $progress,
+            ]);
         } catch (Exception $e) {
             return $this->sendFailedResponse('Failed to retrieve course: ' . $e->getMessage(), 500);
         }

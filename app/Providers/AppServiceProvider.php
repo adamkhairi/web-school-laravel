@@ -20,6 +20,8 @@ use App\Services\Enrollment\EnrollmentService;
 use App\Services\Enrollment\EnrollmentServiceInterface;
 use App\Services\Lesson\LessonService;
 use App\Services\Lesson\LessonServiceInterface;
+use App\Services\Progress\ProgressService;
+use App\Services\Progress\ProgressServiceInterface;
 use App\Services\Submission\SubmissionService;
 use App\Services\Submission\SubmissionServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -50,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EnrollmentServiceInterface::class, EnrollmentService::class);
         $this->app->bind(AssignmentServiceInterface::class, AssignmentService::class);
         $this->app->bind(SubmissionServiceInterface::class, SubmissionService::class);
+        $this->app->bind(ProgressServiceInterface::class, ProgressService::class);
     }
 
     /**

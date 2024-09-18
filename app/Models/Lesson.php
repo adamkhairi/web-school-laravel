@@ -15,6 +15,11 @@ class Lesson extends Model
         'description',
         'content',
         'order',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => LessonStatus::class,
     ];
 
     public function course()
