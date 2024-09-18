@@ -13,7 +13,7 @@ class LessonSeeder extends Seeder
         $courses = Course::all();
 
         foreach ($courses as $course) {
-            $lessonCount = fake()->numberBetween(5, 15);
+            $lessonCount = fake()->numberBetween(5, 20);
 
             for ($i = 1; $i <= $lessonCount; $i++) {
                 Lesson::create([

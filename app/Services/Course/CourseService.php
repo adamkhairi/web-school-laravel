@@ -5,9 +5,9 @@ namespace App\Services\Course;
 use App\Models\Course;
 use App\Enums\CourseStatus;
 use Illuminate\Http\Request;
-use Str;
+use Illuminate\Support\Str;
 
-class CourseService implements CourseInterface
+class CourseService implements CourseServiceInterface
 {
     public function getCourses(Request $request)
     {

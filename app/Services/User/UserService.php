@@ -111,7 +111,7 @@ class UserService implements UserServiceInterface
     return User::whereIn('id', $userIds)->delete();
   }
 
-  public function exportUsers()
+  public function exportUsers(): StreamedResponse
   {
     $users = User::with('roles')->get();
     $csvFileName = 'users_export_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
@@ -146,7 +146,7 @@ class UserService implements UserServiceInterface
     return new StreamedResponse($callback, 200, $headers);
   }
 
-  public function getUserStats()
+  public function getUserStats(): array
   {
     $totalUsers = User::count();
     $activeUsers = User::where('is_active', true)->count();

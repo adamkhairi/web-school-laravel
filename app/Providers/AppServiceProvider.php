@@ -20,6 +20,8 @@ use App\Services\Enrollment\EnrollmentService;
 use App\Services\Enrollment\EnrollmentServiceInterface;
 use App\Services\Lesson\LessonService;
 use App\Services\Lesson\LessonServiceInterface;
+use App\Services\Submission\SubmissionService;
+use App\Services\Submission\SubmissionServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,12 +42,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Inject dependencies
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
         $this->app->bind(CourseServiceInterface::class, CourseService::class);
         $this->app->bind(LessonServiceInterface::class, LessonService::class);
         $this->app->bind(EnrollmentServiceInterface::class, EnrollmentService::class);
         $this->app->bind(AssignmentServiceInterface::class, AssignmentService::class);
+        $this->app->bind(SubmissionServiceInterface::class, SubmissionService::class);
     }
 
     /**

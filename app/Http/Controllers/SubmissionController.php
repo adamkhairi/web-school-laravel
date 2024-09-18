@@ -4,45 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Submission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Services\Submission\SubmissionServiceInterface;
 
 class SubmissionController extends Controller
 {
-    public function __construct()
+    protected $submissionService;
+
+    public function __construct(SubmissionServiceInterface $submissionService)
     {
+        $this->submissionService = $submissionService;
         $this->authorizeResource(Submission::class, 'submission');
     }
+
     public function index($assignmentId)
     {
-        $submissions = Submission::where('assignment_id', $assignmentId)->get();
+        $submissions = $this->submissionService->getSubmissions($assignmentId);
         return response()->json($submissions);
     }
 
     public function store(Request $request, $assignmentId)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,zip|max:20480',
-        ]);
-
-        $filePath = $request->file('file')->store('submissions', 'public');
-
-        $submission = Submission::create([
-            'assignment_id' => $assignmentId,
-            'student_id' => $request->user()->id,
-            'file_path' => $filePath,
-        ]);
-
+        $submission = $this->submissionService->createSubmission($request, $assignmentId);
         return response()->json($submission, 201);
     }
 
     public function grade(Request $request, Submission $submission)
     {
-        $request->validate([
-            'grade' => 'required|integer|min:0|max:100',
-        ]);
-
-        $submission->update(['grade' => $request->grade]);
-
-        return response()->json($submission);
+        $gradedSubmission = $this->submissionService->gradeSubmission($request, $submission);
+        return response()->json($gradedSubmission);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Services\Assignment;
 
 use App\Models\Assignment;
 use App\Models\Submission;
-use App\Services\Assignement\AssignmentServiceInterface;
+use App\Services\Assignment\AssignmentServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
