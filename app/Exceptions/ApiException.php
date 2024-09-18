@@ -2,22 +2,12 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class ApiException extends Exception
+class ApiException extends HttpException
 {
-    protected $statusCode;
-
-    public function __construct($message, $statusCode = 400)
+    public function __construct(string $message = '', int $statusCode = 400, \Throwable $previous = null, array $headers = [])
     {
-        parent::__construct($message);
-        $this->statusCode = $statusCode;
-    }
-
-    public function render()
-    {
-        return response()->json([
-            'error' => $this->getMessage(),
-        ], $this->statusCode);
+        parent::__construct($statusCode, $message, $previous, $headers);
     }
 }

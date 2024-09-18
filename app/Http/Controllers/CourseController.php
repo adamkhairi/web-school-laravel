@@ -9,6 +9,7 @@ use App\Services\Progress\ProgressServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class CourseController extends Controller
 {
@@ -31,29 +32,30 @@ class CourseController extends Controller
     {
         try {
             $courses = $this->courseService->getCourses($request);
-            return response()->json($courses);
+            return $this->successResponse($courses);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to fetch courses: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to fetch courses', 500);
         }
     }
+
 
     public function show(Request $request, Course $course): JsonResponse
     {
         try {
             $course = $this->courseService->getCourse($course);
             $progress = null;
-            
+
             if ($request->user()) {
                 $progressService = app(ProgressServiceInterface::class);
                 $progress = $progressService->getCourseProgress($request->user(), $course);
             }
-            
-            return response()->json([
+
+            return $this->successResponse([
                 'course' => $course,
                 'progress' => $progress,
             ]);
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to retrieve course: ' . $e->getMessage(), 500);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve course', 500);
         }
     }
 
@@ -71,11 +73,11 @@ class CourseController extends Controller
             ]);
 
             $course = $this->courseService->createCourse($validatedData);
-            return response()->json($course, 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to create course: ' . $e->getMessage(), 500);
+            return $this->successResponse($course, 'Course created successfully', 201);
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to create course', 500);
         }
     }
 
@@ -93,9 +95,11 @@ class CourseController extends Controller
             ]);
 
             $updatedCourse = $this->courseService->updateCourse($course, $validatedData);
-            return response()->json($updatedCourse);
+            return $this->successResponse($updatedCourse, 'Course updated successfully');
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to update course: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to update course', 500);
         }
     }
 
@@ -103,9 +107,9 @@ class CourseController extends Controller
     {
         try {
             $this->courseService->deleteCourse($course);
-            return response()->json(null, 204);
+            return $this->successResponse(null, 'Course deleted successfully', 204);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to delete course: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to delete course', 500);
         }
     }
 
@@ -113,9 +117,9 @@ class CourseController extends Controller
     {
         try {
             $course = $this->courseService->setAccessCode($course);
-            return response()->json(['access_code' => $course->access_code]);
+            return $this->successResponse(['access_code' => $course->access_code], 'Access code generated successfully');
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to generate access code: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to generate access code', 500);
         }
     }
 
@@ -123,9 +127,9 @@ class CourseController extends Controller
     {
         try {
             $course = $this->courseService->removeAccessCode($course);
-            return response()->json(['message' => 'Access code removed successfully']);
+            return $this->successResponse(null, 'Access code removed successfully');
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to remove access code: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to remove access code', 500);
         }
     }
 }

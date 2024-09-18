@@ -18,7 +18,8 @@
 
 ### TODOS :
 - Enrollement, Assignment and Submission Policies need to be tested.
-
+- Implement the new ErrorHandler to the controllers and service (successResponse, errorResponse):
+    - Auth - User - Course -
 ---
 ## Phase 1: Backend Development (Weeks 1-8)
 

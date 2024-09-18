@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Models\User;
 use App\Models\Role;
 use App\Enums\RoleType;
+use App\Exceptions\ApiException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -86,66 +87,73 @@ class UserService implements UserServiceInterface
     return $user->is_active ? 'User activated' : 'User deactivated';
   }
 
-  public function assignRole(User $user, RoleType $role)
+  public function assignRole(User $user, RoleType $role): bool
   {
-    if (!$user->hasRole($role)) {
-      $user->assignRole($role);
-      return true;
+    if ($user->hasRole($role)) {
+      return false;
     }
-    return false;
+    $user->assignRole($role);
+    return true;
   }
 
   public function removeRole(User $user, RoleType $role)
   {
-    $roleModel = Role::where('name', $role->value)->firstOrFail();
-    return $user->roles()->detach($roleModel->id);
+    if (!$user->hasRole($role)) {
+      throw new ApiException('User does not have this role', 400);
+    }
+    $user->removeRole($role);
   }
 
   public function getUserActivity(User $user)
   {
+
+    /*TODO: // Implement user activity retrieval logic
+        // This is a placeholder and should be replaced with actual logic
+        return [
+          'last_login' => $user->last_login,
+          'course_progress' => $user->courseProgress,
+          'total_courses' => $user->totalCourses,
+          'total_activities' => $user->totalActivities,
+          'total_time' => $user->totalTime,
+          // Add more activity data as needed
+      ]; */
     return $user->activities()->latest()->take(50)->get();
   }
 
   public function bulkDeleteUsers($userIds)
   {
-    return User::whereIn('id', $userIds)->delete();
+    return DB::transaction(function () use ($userIds) {
+      return User::whereIn('id', $userIds)->delete();
+    });
   }
 
   public function exportUsers(): StreamedResponse
   {
-    $users = User::with('roles')->get();
-    $csvFileName = 'users_export_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
-
     $headers = [
       "Content-type" => "text/csv",
-      "Content-Disposition" => "attachment; filename=$csvFileName",
+      "Content-Disposition" => "attachment; filename=users.csv",
       "Pragma" => "no-cache",
       "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
       "Expires" => "0"
     ];
 
-    $columns = ['ID', 'Name', 'Email', 'Roles', 'Created At'];
-
-    $callback = function () use ($users, $columns) {
+    $callback = function () {
       $file = fopen('php://output', 'w');
-      fputcsv($file, $columns);
+      fputcsv($file, ['ID', 'Name', 'Email', 'Created At']);
 
-      foreach ($users as $user) {
-        fputcsv($file, [
-          $user->id,
-          $user->name,
-          $user->email,
-          $user->roles->pluck('name')->implode(', '),
-          $user->created_at
-        ]);
-      }
+      User::chunk(1000, function ($users) use ($file) {
+        foreach ($users as $user) {
+          fputcsv($file, [$user->id, $user->name, $user->email, $user->created_at]);
+        }
+      });
 
       fclose($file);
     };
 
-    return new StreamedResponse($callback, 200, $headers);
+    return response()->stream($callback, 200, $headers);
   }
 
+  //TODO: Need Fixing this function 
   public function getUserStats(): array
   {
     $totalUsers = User::count();
@@ -155,11 +163,19 @@ class UserService implements UserServiceInterface
       ->select('roles.name', DB::raw('count(*) as count'))
       ->groupBy('roles.name')
       ->get();
-
+    
     return [
       'total_users' => $totalUsers,
       'active_users' => $activeUsers,
       'users_by_role' => $usersByRole
     ];
+
+    /* return [
+      'total_users' => User::count(),
+      'active_users' => User::where('status', 'active')->count(),
+      'inactive_users' => User::where('status', 'inactive')->count(),
+      'users_by_role' => User::groupBy('role')->selectRaw('role, count(*) as count')->pluck('count', 'role'),
+    ]; */
   }
 }
+

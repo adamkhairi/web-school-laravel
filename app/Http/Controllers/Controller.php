@@ -2,23 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
-abstract class Controller
+abstract class Controller extends BaseController
 {
-    protected function respondWithJson($data, $statusCode = 200)
-    {
-        return response()->json($data, $statusCode);
-    }
-
-    // Error Handling and Validation
-    protected function sendFailedResponse($message, $status): JsonResponse
-    {
-        return response()->json(['error' => $message], $status);
-    }
-
-    protected function validateRequest(array $rules)
-    {
-        return request()->validate($rules);
-    }
+    use AuthorizesRequests, ValidatesRequests, ApiResponseTrait;
 }

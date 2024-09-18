@@ -18,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
-    public function login(Request $request): JsonResponse
+    public function login(Request $request): array
     {
         $key = 'login_attempts_' . $request->ip();
 
@@ -27,30 +27,29 @@ class AuthService implements AuthServiceInterface
             throw new ApiException("Too many login attempts. Please try again in {$seconds} seconds.", 429);
         }
 
-        $credentials = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            RateLimiter::clear($key);
-            $user = Auth::user();
-            $user->tokens()->delete();
-            $token = $user->createToken('api-token')->plainTextToken;
-
-            return response()->json([
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_in' => config('sanctum.expiration') * 60,
-                'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
-            ]);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw new ApiException('Invalid credentials', 401);
         }
 
+        $user = Auth::user();
+        $token = $user->createToken('api-token')->plainTextToken;
+
         RateLimiter::hit($key);
-        throw new ApiException('Invalid credentials', 401);
+
+        return [
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user,
+        ];
+
     }
 
-    public function register(Request $request): JsonResponse
+    public function register(Request $request): array
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -66,35 +65,30 @@ class AuthService implements AuthServiceInterface
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
+        return [
             'message' => 'User successfully registered',
             'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at']),
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => config('sanctum.expiration') * 60,
-        ], 201);
+        ];
     }
 
-    public function logout(): JsonResponse
+    public function logout(): void
     {
         Auth::user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out successfully.']);
     }
 
-    public function getUserData(): JsonResponse
+    public function getUserData(): User
     {
-        $user = Auth::user();
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-            'roles' => $user->roles->pluck('name'),
-        ]);
+        $userData = Auth::user();
+        if (!$userData) {
+            throw new ApiException('User not found', 404);
+        }
+        return $userData;
     }
 
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(Request $request): User|null
     {
         $user = Auth::user();
         $validatedData = $request->validate([
@@ -103,22 +97,20 @@ class AuthService implements AuthServiceInterface
         ]);
 
         $user->update($validatedData);
-        return response()->json(['message' => 'Profile updated successfully.', 'user' => $user]);
+        return $user;
     }
 
-    public function sendPasswordResetEmail(Request $request): JsonResponse
+    public function sendPasswordResetEmail(Request $request): void
     {
         $request->validate(['email' => 'required|email']);
         $status = Password::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent to your email.']);
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw new ApiException('Failed to send password reset link', 400);
         }
-
-        throw new ApiException('Failed to send password reset link. Please try again.', 400);
     }
 
-    public function resetPassword(Request $request): JsonResponse
+    public function resetPassword(Request $request): void
     {
         $request->validate([
             'token' => 'required',
@@ -128,60 +120,58 @@ class AuthService implements AuthServiceInterface
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
+            function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
-
-                $user->save();
+                ])->save();
             }
         );
 
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Password has been successfully reset.']);
+        if ($status !== Password::PASSWORD_RESET) {
+            throw new ApiException('Failed to reset password', 400);
         }
-
-        throw new ApiException('Failed to reset password. Please try again.', 400);
     }
 
-    public function enableTwoFactorAuth(): JsonResponse
+    public function enableTwoFactorAuth(): array
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $token = $user->createToken('2fa')->plainTextToken;
-        return response()->json(['message' => 'Two-factor authentication enabled.', 'token' => $token]);
+        return ['token' => $token];
     }
 
-    public function disableTwoFactorAuth(): JsonResponse
+    public function disableTwoFactorAuth(): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $user->tokens()->where('name', '2fa')->delete();
-        return response()->json(['message' => 'Two-factor authentication disabled.']);
     }
 
-    public function verifyTwoFactorAuth(Request $request): JsonResponse
+    public function verifyTwoFactorAuth(Request $request): void
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'token' => 'required|string',
         ]);
 
-        $user = auth()->user();
-        $token = PersonalAccessToken::findToken($validatedData['token']);
+        $user = Auth::user();
+        $token = PersonalAccessToken::findToken($request->token);
 
-        if ($token && $token->tokenable_id === $user->id && $token->name === '2fa') {
-            return response()->json(['message' => 'Two-factor authentication successful.']);
+        if (!$token || $token->tokenable_id !== $user->id || $token->name !== '2fa') {
+            throw new ApiException('Invalid two-factor authentication token', 401);
         }
-        throw new ApiException('Invalid two-factor authentication token.', 401);
     }
 
-    public function refresh(Request $request): JsonResponse
+    public function refresh(Request $request): array
     {
         $user = $request->user();
         $user->tokens()->delete();
-        $token = $user->createToken('api_token')->plainTextToken;
-        return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ];
     }
 
-    public function verifyEmail(Request $request): JsonResponse
+    public function verifyEmail(Request $request): void
     {
         $request->validate([
             'id' => 'required|integer',
@@ -199,32 +189,24 @@ class AuthService implements AuthServiceInterface
         }
 
         $user->markEmailAsVerified();
-        return response()->json(['message' => 'Email verified successfully']);
     }
 
-    public function assignRole(Request $request, User $user): JsonResponse
+    public function assignRole(Request $request, User $user): void
     {
-        try {
-            $validatedData = $request->validate([
-                'role' => ['required', Rule::in(RoleType::values())],
-            ]);
+        $validatedData = $request->validate([
+            'role' => ['required', Rule::in(RoleType::values())],
+        ]);
 
-            $role = RoleType::from($validatedData['role']);
+        $role = RoleType::from($validatedData['role']);
 
-            if (!$user->hasRole($role)) {
-                $user->assignRole($role);
-                return response()->json(['message' => 'Role assigned successfully'], 200);
-            }
-
-            return response()->json(['message' => 'User already has this role'], 200);
-        } catch (ValidationException $e) {
-            throw new ApiException('Invalid role provided', 422);
-        } catch (\Exception $e) {
-            throw new ApiException('Failed to assign role', 500);
+        if (!$user->hasRole($role)) {
+            $user->assignRole($role);
+        } else {
+            throw new ApiException('User already has this role', 400);
         }
     }
 
-    public function removeRole(Request $request, User $user): JsonResponse
+    public function removeRole(Request $request, User $user): void
     {
         $validatedData = $request->validate([
             'role' => ['required', Rule::in(RoleType::values())],
@@ -234,9 +216,8 @@ class AuthService implements AuthServiceInterface
 
         if ($user->hasRole($role)) {
             $user->removeRole($role);
-            return response()->json(['message' => 'Role removed successfully'], 200);
+        } else {
+            throw new ApiException('User does not have this role', 400);
         }
-
-        return response()->json(['message' => 'User does not have this role'], 200);
     }
 }

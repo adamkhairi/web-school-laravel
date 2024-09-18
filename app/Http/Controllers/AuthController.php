@@ -24,14 +24,11 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->login($request);
-            return response()->json($result, 200);
-        } catch (ApiException $e) {
-            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
+            return $this->successResponse($result, 'Login successful');
         } catch (ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
-        } catch (Exception $e) {
-            report($e);
-            return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
+            return $this->errorResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -39,24 +36,21 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->register($request);
-            return response()->json($result, 201);
+            return $this->successResponse($result, 'Registration successful', 201);
         } catch (ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
-        } catch (Exception $e) {
-            report($e);
-            return $this->sendFailedResponse('Failed to register user. Please try again.', 500);
+            return $this->errorResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
     public function logout(): JsonResponse
     {
         try {
-            $result = $this->authService->logout();
-            return response()->json($result, 200);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return $this->sendFailedResponse('You are already logged out.', 401);
-        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return $this->sendFailedResponse('Failed to logout. Please try again.', 500);
+            $this->authService->logout();
+            return $this->successResponse(null, 'Logout successful');
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -64,9 +58,9 @@ class AuthController extends Controller
     {
         try {
             $userData = $this->authService->getUserData();
-            return response()->json(['user' => $userData], 200);
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to retrieve user data. Please try again.', 500);
+            return $this->successResponse(['user' => $userData]);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -74,11 +68,11 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->updateProfile($request);
-            return response()->json($result, 200);
+            return $this->successResponse($result, 'Profile updated successfully');
         } catch (ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to update profile. Please try again.', 500);
+            return $this->errorResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -86,14 +80,12 @@ class AuthController extends Controller
     public function sendPasswordResetEmail(Request $request): JsonResponse
     {
         try {
-            $result = $this->authService->sendPasswordResetEmail($request);
-            return response()->json($result, 200);
+            $this->authService->sendPasswordResetEmail($request);
+            return $this->successResponse(null, 'Password reset email sent');
         } catch (ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
+            return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -101,18 +93,16 @@ class AuthController extends Controller
     public function resetPassword(Request $request): JsonResponse
     {
         try {
-            $result = $this->authService->resetPassword($request);
-            return response()->json($result, 200);
+            $this->authService->resetPassword($request);
+            return $this->successResponse(null, 'Password reset successful');
         } catch (ValidationException $e) {
-            return $this->sendFailedResponse($e->errors(), 422);
+            return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('An unexpected error occurred. Please try again.', 500);
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
-    public function respondWithToken($token): JsonResponse
+/*     public function respondWithToken($token): JsonResponse
     {
         $user = auth()->user();
         return response()->json([
@@ -121,25 +111,38 @@ class AuthController extends Controller
             'expires_in' => config('sanctum.expiration') * 60,
             'user' => $user->only(['id', 'name', 'email', 'created_at', 'updated_at'])
         ]);
-    }
+    } */
 
     // Two-Factor Authentication (2FA)
     public function enableTwoFactorAuth(Request $request): JsonResponse
     {
-        return $this->authService->enableTwoFactorAuth();
+        try {
+            $result = $this->authService->enableTwoFactorAuth();
+            return $this->successResponse($result, 'Two-factor authentication enabled');
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+        }
     }
 
     public function disableTwoFactorAuth(Request $request): JsonResponse
     {
-        return $this->authService->disableTwoFactorAuth();
+        try {
+            $this->authService->disableTwoFactorAuth();
+            return $this->successResponse(null, 'Two-factor authentication disabled');
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+        }
     }
 
     public function verifyTwoFactorAuth(Request $request): JsonResponse
     {
         try {
-            return $this->authService->verifyTwoFactorAuth($request);
+            $this->authService->verifyTwoFactorAuth($request);
+            return $this->successResponse(null, 'Two-factor authentication verified');
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
@@ -153,48 +156,49 @@ class AuthController extends Controller
         }
     }
 
-    public function refresh(Request $request)
+    public function refresh(Request $request): JsonResponse
     {
         try {
-            return $this->authService->refresh($request);
-        } catch (Exception $e) {
-            throw new ApiException('Failed to refresh token', 401);
+            $result = $this->authService->refresh($request);
+            return $this->successResponse($result, 'Token refreshed successfully');
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
     public function verifyEmail(Request $request): JsonResponse
     {
         try {
-            return $this->authService->verifyEmail($request);
+            $this->authService->verifyEmail($request);
+            return $this->successResponse(null, 'Email verified successfully');
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            return $this->sendFailedResponse($e->getMessage(), $e->getCode());
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
-    /**
-     * Assign a role to a user.
-     *
-     * @param Request $request
-     * @param User $user
-     * @return JsonResponse
-     */
     public function assignRole(Request $request, User $user): JsonResponse
     {
         try {
-            return $this->authService->assignRole($request, $user);
-        } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to assign role: ' . $e->getMessage(), 500);
+            $this->authService->assignRole($request, $user);
+            return $this->successResponse(null, 'Role assigned successfully');
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
     public function removeRole(Request $request, User $user): JsonResponse
     {
         try {
-            return $this->authService->removeRole($request, $user);
+            $this->authService->removeRole($request, $user);
+            return $this->successResponse(null, 'Role removed successfully');
         } catch (ValidationException $e) {
-            throw new ApiException('Invalid role provided', 422);
-        } catch (Exception $e) {
-            throw new ApiException('Failed to remove role', 500);
+            return $this->errorResponse($e->errors(), 422);
+        } catch (ApiException $e) {
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 

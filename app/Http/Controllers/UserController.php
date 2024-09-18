@@ -34,9 +34,9 @@ class UserController extends Controller
     {
         try {
             $users = $this->userService->getUsers($request);
-            return response()->json($users);
+            return $this->successResponse($users);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to fetch users: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to fetch users', 500);
         }
     }
 
@@ -49,9 +49,9 @@ class UserController extends Controller
     public function show(User $user): JsonResponse
     {
         try {
-            return response()->json($user);
+            return $this->successResponse($user);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to retrieve user: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to retrieve user', 500);
         }
     }
 
@@ -65,9 +65,9 @@ class UserController extends Controller
     {
         try {
             $user = $this->userService->createUser($request->validated());
-            return response()->json($user, 201);
+            return $this->successResponse($user, 'User created successfully', 201);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to create user: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to create user', 500);
         }
     }
 
@@ -82,9 +82,9 @@ class UserController extends Controller
     {
         try {
             $updatedUser = $this->userService->updateUser($user, $request->validated());
-            return response()->json($updatedUser);
+            return $this->successResponse($updatedUser, 'User updated successfully');
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to update user: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to update user', 500);
         }
     }
 
@@ -98,9 +98,9 @@ class UserController extends Controller
     {
         try {
             $this->userService->deleteUser($user);
-            return response()->json(null, 204);
+            return $this->successResponse(null, 'User deleted successfully', 204);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to delete user: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to delete user', 500);
         }
     }
 
@@ -114,10 +114,9 @@ class UserController extends Controller
     {
         try {
             $message = $this->userService->toggleUserActivation($user);
-
-            return response()->json(['message' => $message], 200);
+            return $this->successResponse($message, 200);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to toggle user activation: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to toggle user activation', 500);
         }
     }
 
@@ -138,12 +137,12 @@ class UserController extends Controller
             $role = RoleType::from($validatedData['role']);
 
             if ($this->userService->assignRole($user, $role)) {
-                return response()->json(['message' => 'Role assigned successfully'], 200);
+                return $this->successResponse(null, 'Role assigned successfully');
             } else {
-                return response()->json(['message' => 'User already has this role'], 200);
+                return $this->successResponse(null, 'User already has this role');
             }
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to assign role: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to assign role', 500);
         }
     }
 
@@ -157,9 +156,9 @@ class UserController extends Controller
             $role = RoleType::from($validatedData['role']);
 
             $this->userService->removeRole($user, $role);
-            return response()->json(['message' => 'Role removed successfully'], 200);
+            return $this->successResponse(null, 'Role removed successfully');
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to remove role: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to remove role', 500);
         }
     }
 
@@ -167,9 +166,9 @@ class UserController extends Controller
     {
         try {
             $activity = $this->userService->getUserActivity($user);
-            return response()->json($activity);
+            return $this->successResponse($activity);
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to retrieve user activity: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to retrieve user activity', 500);
         }
     }
 
@@ -183,11 +182,9 @@ class UserController extends Controller
 
             $this->userService->bulkDeleteUsers($validatedData['user_ids']);
 
-            return response()->json(['message' => 'Users deleted successfully']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->sendFailedResponse('Validation failed' . $e->errors(), 422);
+            return $this->successResponse(null, 'Users deleted successfully');
         } catch (Exception $e) {
-            return $this->sendFailedResponse('Failed to delete users: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to delete users', 500);
         }
     }
 
@@ -196,7 +193,7 @@ class UserController extends Controller
         try {
             return $this->userService->exportUsers();
         } catch (Exception $e) {
-            return response()->json(['error' => 'Failed to export users: ' . $e->getMessage()], 500);
+            return $this->errorResponse('Failed to export users', 500);
         }
     }
 
@@ -204,9 +201,9 @@ class UserController extends Controller
     {
         try {
             $stats = $this->userService->getUserStats();
-            return response()->json($stats);
+            return $this->successResponse($stats);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve user stats: ' . $e->getMessage()], 500);
+            return $this->errorResponse('Failed to retrieve user stats', 500);
         }
     }
 }
