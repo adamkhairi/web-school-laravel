@@ -14,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Global Middlewares
-
+        $middleware->alias([
+            'role' => CheckRole::class,
+        ]);
         //$middleware->append(EnsureTokenIsValid::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

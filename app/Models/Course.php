@@ -43,10 +43,21 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
-
    public function students()
     {
         return $this->belongsToMany(User::class, 'enrollments')
             ->wherePivot('status', EnrollmentStatus::Approved);
     }
+
+    public function materials()
+    {
+        return $this->hasMany(CourseMaterial::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+
 }
