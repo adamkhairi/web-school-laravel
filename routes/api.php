@@ -75,7 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{course}', [CourseController::class, 'show'])->name('courses.show');
         Route::put('/{course}', [CourseController::class, 'update'])->name('courses.update');
         Route::delete('/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
-
+        // Code Access Management
+        Route::post('/{course}/access-code', [CourseController::class, 'generateAccessCode'])->name('courses.generateAccessCode');
+        Route::delete('/{course}/access-code', [CourseController::class, 'removeAccessCode'])->name('courses.removeAccessCode');
         // Lesson Management
         Route::get('/{course}/lessons', [LessonController::class, 'index'])->name('lessons.index');
         Route::post('/{course}/lessons', [LessonController::class, 'store'])->name('lessons.store');

@@ -97,4 +97,24 @@ class CourseController extends Controller
             return $this->sendFailedResponse('Failed to delete course: ' . $e->getMessage(), 500);
         }
     }
+
+    public function generateAccessCode(Course $course): JsonResponse
+    {
+        try {
+            $course = $this->courseService->setAccessCode($course);
+            return response()->json(['access_code' => $course->access_code]);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to generate access code: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function removeAccessCode(Course $course): JsonResponse
+    {
+        try {
+            $course = $this->courseService->removeAccessCode($course);
+            return response()->json(['message' => 'Access code removed successfully']);
+        } catch (Exception $e) {
+            return $this->sendFailedResponse('Failed to remove access code: ' . $e->getMessage(), 500);
+        }
+    }
 }

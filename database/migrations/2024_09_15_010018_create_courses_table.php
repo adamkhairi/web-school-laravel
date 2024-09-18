@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->enum('status', CourseStatus::values())->default(CourseStatus::Planned->value);
             $table->integer('capacity')->default(30);
+            $table->string('access_code')->nullable()->unique();
              $table->timestamps();
         });
     }

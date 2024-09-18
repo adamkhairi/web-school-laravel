@@ -12,4 +12,8 @@ interface CourseServiceInterface
     public function createCourse(array $data);
     public function updateCourse(Course $course, array $data);
     public function deleteCourse(Course $course);
+    public function generateAccessCode();
+    public function setAccessCode(Course $course);
+    public function removeAccessCode(Course $course);
+
 }

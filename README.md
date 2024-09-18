@@ -37,7 +37,7 @@
 -   [ ] Develop course material management (upload, organize, delete)
 -   [x] Implement course planning functionality for teachers
 -   [x] Add ability to create a course in "planned" status
--   [ ] Develop endpoints to update course details and status
+-   [x] Develop endpoints to update course details and status
 -   [ ] Create functionality to generate and manage course access codes
 
 #### 1.1.3 Student Enrollment Module

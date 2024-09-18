@@ -5,6 +5,7 @@ namespace App\Services\Course;
 use App\Models\Course;
 use App\Enums\CourseStatus;
 use Illuminate\Http\Request;
+use Str;
 
 class CourseService implements CourseInterface
 {
@@ -77,5 +78,28 @@ class CourseService implements CourseInterface
     public function deleteCourse(Course $course)
     {
         return $course->delete();
+    }
+
+    public function generateAccessCode()
+    {
+        do {
+            $code = strtoupper(Str::random(8));
+        } while (Course::where('access_code', $code)->exists());
+
+        return $code;
+    }
+
+    public function setAccessCode(Course $course)
+    {
+        $course->access_code = $this->generateAccessCode();
+        $course->save();
+        return $course;
+    }
+
+    public function removeAccessCode(Course $course)
+    {
+        $course->access_code = null;
+        $course->save();
+        return $course;
     }
 }

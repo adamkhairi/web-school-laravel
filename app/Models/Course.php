@@ -19,6 +19,7 @@ class Course extends Model
         'end_date',
         'status',
         'capacity',
+        'access_code',
     ];
 
     protected $casts = [
