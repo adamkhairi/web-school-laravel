@@ -104,20 +104,20 @@ class UserService implements UserServiceInterface
     $user->removeRole($role);
   }
 
+  //TODO: Fix and Implement user activity retrieval logic
   public function getUserActivity(User $user)
   {
 
-    /*TODO: // Implement user activity retrieval logic
-        // This is a placeholder and should be replaced with actual logic
-        return [
-          'last_login' => $user->last_login,
-          'course_progress' => $user->courseProgress,
-          'total_courses' => $user->totalCourses,
-          'total_activities' => $user->totalActivities,
-          'total_time' => $user->totalTime,
-          // Add more activity data as needed
-      ]; */
-    return $user->activities()->latest()->take(50)->get();
+    // This is a placeholder and should be replaced with actual logic
+    return [
+      'last_login' => $user->last_login,
+      'course_progress' => $user->courseProgress,
+      'total_courses' => $user->totalCourses,
+      'total_activities' => $user->totalActivities,
+      'total_time' => $user->totalTime,
+      // Add more activity data as needed
+    ];
+    //return $user->activities()->latest()->take(50)->get();
   }
 
   public function bulkDeleteUsers($userIds)
@@ -163,19 +163,13 @@ class UserService implements UserServiceInterface
       ->select('roles.name', DB::raw('count(*) as count'))
       ->groupBy('roles.name')
       ->get();
-    
+
     return [
       'total_users' => $totalUsers,
       'active_users' => $activeUsers,
+      'inactive_users' => $totalUsers - $activeUsers,
       'users_by_role' => $usersByRole
     ];
-
-    /* return [
-      'total_users' => User::count(),
-      'active_users' => User::where('status', 'active')->count(),
-      'inactive_users' => User::where('status', 'inactive')->count(),
-      'users_by_role' => User::groupBy('role')->selectRaw('role, count(*) as count')->pluck('count', 'role'),
-    ]; */
   }
 }
 

@@ -8,9 +8,12 @@ use App\Http\Controllers\StudyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\SubmissionController;
+use App\Mail\UserActivationStatus;
 use App\Models\Assignment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -254,6 +257,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/statistics/{course}', [EnrollmentController::class, 'getEnrollmentStatistics'])->name('enrollments.statistics');
     });
 
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        // GET /api/notifications
+        Route::get('/', [NotificationController::class, 'index']);
+        // POST /api/notifications/{id}/read
+        // Example: {"read": true}
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+    });
+
+    Route::get('/mailable', function () {
+        $user = User::first();
+        return new UserActivationStatus($user, 'activated');
+    });
 });
 
 // Protected Endpoint (Using auth:api middleware)

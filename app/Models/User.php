@@ -120,4 +120,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Progress::class);
     }
+
+    /**
+     *  Get the progress associated with the user.
+     *  
+     *  
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

@@ -1,543 +1,87 @@
 {
   "info": {
-    "name": "Course Management API",
+    "name": "Notifications API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "List Courses",
+      "name": "Get Notifications",
       "request": {
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
             "key": "Authorization",
-            "value": "Bearer {{token}}",
+            "value": "Bearer {{auth_token}}",
             "type": "text"
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/courses?search=math&teacher=john&status=active&created_after=2023-01-01&created_before=2023-12-31&sort_by=name&sort_direction=asc&per_page=20",
+          "raw": "{{base_url}}/api/notifications",
           "host": ["{{base_url}}"],
-          "path": ["api", "courses"],
+          "path": ["api", "notifications"],
           "query": [
-            {"key": "search", "value": "math"},
-            {"key": "teacher", "value": "john"},
-            {"key": "status", "value": "active"},
-            {"key": "created_after", "value": "2023-01-01"},
-            {"key": "created_before", "value": "2023-12-31"},
-            {"key": "sort_by", "value": "name"},
-            {"key": "sort_direction", "value": "asc"},
-            {"key": "per_page", "value": "20"}
-          ]
-        }
-      }
-    },
-    {
-      "name": "Create Course",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Introduction to Mathematics\",\n    \"description\": \"A beginner's course in mathematics\",\n    \"teacher_id\": 1\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses"]
-        }
-      }
-    },
-    {
-      "name": "Get Course",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1"]
-        }
-      }
-    },
-    {
-      "name": "Update Course",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Advanced Mathematics\",\n    \"description\": \"An advanced course in mathematics\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1"]
-        }
-      }
-    },
-    {
-      "name": "Delete Course",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1"]
-        }
-      }
-    },
-    {
-      "name": "Generate Access Code",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/access-code",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "access-code"]
-        }
-      }
-    },
-    {
-      "name": "Remove Access Code",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/access-code",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "access-code"]
-        }
-      }
-    },
-    {
-      "name": "List Lessons",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons"]
-        }
-      }
-    },
-    {
-      "name": "Create Lesson",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Lesson 1: Introduction\",\n    \"content\": \"This is the content of lesson 1\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons"]
-        }
-      }
-    },
-    {
-      "name": "Update Lesson",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Updated Lesson 1\",\n    \"content\": \"This is the updated content of lesson 1\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons", "1"]
-        }
-      }
-    },
-    {
-      "name": "Delete Lesson",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons", "1"]
-        }
-      }
-    },
-    {
-      "name": "Get Course Progress",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/progress",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "progress"]
-        }
-      }
-    },
-    {
-      "name": "Mark Lesson as Completed",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons/1/complete",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons", "1", "complete"]
-        }
-      }
-    },
-    {
-      "name": "Mark Lesson as Incomplete",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/lessons/1/incomplete",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "lessons", "1", "incomplete"]
-        }
-      }
-    },
-    {
-      "name": "Upload Course Material",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
             {
-              "key": "title",
-              "value": "Chapter 1 Notes",
-              "type": "text"
+              "key": "unread",
+              "value": "true",
+              "description": "Filter to get only unread notifications"
             },
             {
-              "key": "file",
-              "type": "file",
-              "src": "/path/to/your/file.pdf"
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/materials",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "materials"]
-        }
-      }
-    },
-    {
-      "name": "List Course Materials",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/materials",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "materials"]
-        }
-      }
-    },
-    {
-      "name": "Delete Course Material",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/materials/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "materials", "1"]
-        }
-      }
-    },
-    {
-      "name": "List Assignments",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/assignments",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "assignments"]
-        }
-      }
-    },
-    {
-      "name": "Create Assignment (Teacher)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Homework 1\",\n    \"description\": \"Complete exercises 1-5\",\n    \"due_date\": \"2023-12-31\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/courses/1/assignments",
-          "host": ["{{base_url}}"],
-          "path": ["api", "courses", "1", "assignments"]
-        }
-      }
-    },
-    {
-      "name": "Update Assignment (Teacher)",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Updated Homework 1\",\n    \"description\": \"Complete exercises 1-10\",\n    \"due_date\": \"2024-01-15\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/assignments/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "assignments", "1"]
-        }
-      }
-    },
-    {
-      "name": "Delete Assignment (Teacher)",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/assignments/1",
-          "host": ["{{base_url}}"],
-          "path": ["api", "assignments", "1"]
-        }
-      }
-    },
-    {
-      "name": "List Assignment Submissions (Teacher)",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{base_url}}/api/assignments/1/submissions",
-          "host": ["{{base_url}}"],
-          "path": ["api", "assignments", "1", "submissions"]
-        }
-      }
-    },
-    {
-      "name": "Grade Submission (Teacher)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"grade\": 95,\n    \"feedback\": \"Excellent work!\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/submissions/1/grade",
-          "host": ["{{base_url}}"],
-          "path": ["api", "submissions", "1", "grade"]
-        }
-      }
-    },
-    {
-      "name": "Submit Assignment (Student)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            {
-              "key": "content",
-              "value": "Here's my submission for Homework 1",
-              "type": "text"
+              "key": "sort_by",
+              "value": "created_at",
+              "description": "Sort notifications by creation date"
             },
             {
-              "key": "file",
-              "type": "file",
-              "src": "/path/to/your/submission.pdf"
+              "key": "per_page",
+              "value": "10",
+              "description": "Number of notifications per page"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number for pagination"
             }
           ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Mark Notification as Read",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"read\": true\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/assignments/1/submit",
+          "raw": "{{base_url}}/api/notifications/1/read",
           "host": ["{{base_url}}"],
-          "path": ["api", "assignments", "1", "submit"]
+          "path": ["api", "notifications", "1", "read"]
         }
-      }
+      },
+      "response": []
     }
   ],
   "variable": [
@@ -546,8 +90,8 @@
       "value": "http://localhost:8000"
     },
     {
-      "key": "token",
-      "value": "your_jwt_token_here"
+      "key": "auth_token",
+      "value": "your_auth_token_here"
     }
   ]
 }

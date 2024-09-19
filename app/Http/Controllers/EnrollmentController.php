@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EnrollmentStatus;
+use App\Events\EnrollmentStatusUpdated;
 use App\Models\Enrollment;
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -52,6 +54,12 @@ class EnrollmentController extends Controller
 
         try {
             $result = $this->enrollmentService->updateEnrollmentStatus($request, $enrollment);
+
+            // Emit event if enrollment status is approved
+            if ($enrollment->status === EnrollmentStatus::Approved) {
+                event(new EnrollmentStatusUpdated($enrollment));
+            }
+            
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update enrollment status: ' . $e->getMessage()], 500);

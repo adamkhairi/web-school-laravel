@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SubmissionGraded;
 use App\Models\Assignment;
 use App\Models\Submission;
 use App\Services\Assignment\AssignmentServiceInterface;
@@ -39,6 +40,10 @@ class AssignmentController extends Controller
 
             $validatedData['course_id'] = $courseId;
             $assignment = $this->assignmentService->createAssignment($validatedData);
+
+            // Trigger event for new assignment
+            event(new NewAssignmentCreated($assignment));
+
             return response()->json($assignment, 201);
         } catch (\Exception $e) {
             return $this->sendFailedResponse('Failed to create assignment: ' . $e->getMessage(), 500);
@@ -95,6 +100,10 @@ class AssignmentController extends Controller
             ]);
 
             $gradedSubmission = $this->assignmentService->gradeSubmission($submission, $validatedData);
+           
+            // Trigger event for submission graded
+            event(new SubmissionGraded($gradedSubmission));
+
             return response()->json($gradedSubmission);
         } catch (\Exception $e) {
             return $this->sendFailedResponse('Failed to grade submission: ' . $e->getMessage(), 500);

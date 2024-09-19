@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
         EnrollmentSeeder::class,
         AssignmentSeeder::class,
         SubmissionSeeder::class,
-        ProgressSeeder::class
+        ProgressSeeder::class,
+        NotificationSeeder::class
     ]);
 }
 }

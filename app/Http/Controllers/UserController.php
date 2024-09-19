@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleType;
+use App\Events\UserActivationToggled;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,6 +13,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Services\User\UserServiceInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -114,6 +116,10 @@ class UserController extends Controller
     {
         try {
             $message = $this->userService->toggleUserActivation($user);
+
+            // Fire user activation toggled event
+            event(new UserActivationToggled($user));
+
             return $this->successResponse($message, 200);
         } catch (Exception $e) {
             return $this->errorResponse('Failed to toggle user activation', 500);
@@ -168,7 +174,15 @@ class UserController extends Controller
             $activity = $this->userService->getUserActivity($user);
             return $this->successResponse($activity);
         } catch (Exception $e) {
-            return $this->errorResponse('Failed to retrieve user activity', 500);
+            // Log the error with details
+            Log::error('Failed to retrieve user activity', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            // Return a more informative error response
+            return $this->errorResponse('Failed to retrieve user activity: ' . $e->getMessage(), 500);
         }
     }
 

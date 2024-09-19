@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CourseStatus;
+use App\Events\CourseStatusChanged;
 use App\Models\Course;
 use App\Services\Course\CourseServiceInterface;
 use App\Services\Progress\ProgressServiceInterface;
@@ -95,6 +96,12 @@ class CourseController extends Controller
             ]);
 
             $updatedCourse = $this->courseService->updateCourse($course, $validatedData);
+
+            // Fire course status changed event
+            if ($course->wasChanged('status')) {
+                event(new CourseStatusChanged($course));
+            }
+
             return $this->successResponse($updatedCourse, 'Course updated successfully');
         } catch (ValidationException $e) {
             return $this->errorResponse($e->errors(), 422);

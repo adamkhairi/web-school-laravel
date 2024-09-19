@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LessonCompleted;
+use App\Events\NewLessonCreated;
 use App\Models\Lesson;
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -48,6 +50,10 @@ class LessonController extends Controller
             ]);
 
             $lesson = $this->lessonService->createLesson($course, $validatedData);
+
+            // Trigger event for new lesson
+            event(new NewLessonCreated($lesson));
+
             return response()->json($lesson, 201);
         } catch (\Exception $e) {
             return $this->sendFailedResponse('Failed to create lesson: ' . $e->getMessage(), 500);
@@ -85,6 +91,10 @@ class LessonController extends Controller
     {
         try {
             $progress = $this->lessonService->markLessonAsCompleted($request->user(), $course, $lesson);
+
+            // Trigger event for lesson completion
+            event(new LessonCompleted($request->user(), $lesson));
+
             return response()->json($progress);
         } catch (\Exception $e) {
             return $this->sendFailedResponse('Failed to mark lesson as completed: ' . $e->getMessage(), 500);
