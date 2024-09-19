@@ -79,7 +79,7 @@ class AuthService implements AuthServiceInterface
         Auth::user()->tokens()->delete();
     }
 
-    public function getUserData(): User
+    public function getUserData()
     {
         $userData = Auth::user();
         if (!$userData) {

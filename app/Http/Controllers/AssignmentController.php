@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewAssignmentCreated;
 use App\Events\SubmissionGraded;
 use App\Models\Assignment;
 use App\Models\Submission;
@@ -100,7 +101,7 @@ class AssignmentController extends Controller
             ]);
 
             $gradedSubmission = $this->assignmentService->gradeSubmission($submission, $validatedData);
-           
+
             // Trigger event for submission graded
             event(new SubmissionGraded($gradedSubmission));
 

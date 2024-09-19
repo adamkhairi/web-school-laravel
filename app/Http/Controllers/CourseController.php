@@ -55,7 +55,7 @@ class CourseController extends Controller
                 'course' => $course,
                 'progress' => $progress,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->errorResponse('Failed to retrieve course', 500);
         }
     }

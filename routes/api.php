@@ -271,6 +271,7 @@ Route::middleware('auth:sanctum')->group(function () {
         $user = User::first();
         return new UserActivationStatus($user, 'activated');
     });
+
 });
 
 // Protected Endpoint (Using auth:api middleware)

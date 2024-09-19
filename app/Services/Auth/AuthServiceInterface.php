@@ -11,8 +11,8 @@ interface AuthServiceInterface
   public function login(Request $request): array;
   public function register(Request $request): array;
   public function logout(): void;
-  public function getUserData(): User;
-  public function updateProfile(Request $request):  User | null;
+  public function getUserData();
+  public function updateProfile(Request $request): User|null;
   public function sendPasswordResetEmail(Request $request): void;
   public function resetPassword(Request $request): void;
   public function enableTwoFactorAuth(): array;
