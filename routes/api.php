@@ -266,12 +266,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Example: {"read": true}
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
     });
-
-    Route::get('/mailable', function () {
-        $user = User::first();
-        return new UserActivationStatus($user, 'activated');
-    });
-
 });
 
 // Protected Endpoint (Using auth:api middleware)

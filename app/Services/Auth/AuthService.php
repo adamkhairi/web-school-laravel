@@ -12,6 +12,7 @@ use App\Enums\RoleType;
 use App\Exceptions\ApiException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -20,14 +21,10 @@ class AuthService implements AuthServiceInterface
 {
     public function login(Request $request): array
     {
-        Log::info('Login attempt', ['email' => $request->email, 'ip' => $request->ip()]);
-
-$user = User::where('email',
         $key = 'login_attempts_' . $request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
-            Log::info('Too many login attempts', ['email' => $request->email, 'ip' => $request->ip(), 'seconds' => $seconds]);
             throw new ApiException("Too many login attempts. Please try again in {$seconds} seconds.", 429);
         }
 
@@ -37,7 +34,6 @@ $user = User::where('email',
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
-            Log::warning('Invalid login attempt', ['email' => $request->email, 'ip' => $request->ip()]);
             throw new ApiException('Invalid credentials', 401);
         }
 
@@ -45,8 +41,7 @@ $user = User::where('email',
         $token = $user->createToken('api-token')->plainTextToken;
 
         RateLimiter::hit($key);
-        
-        Log::info('User logged in', ['user_id' => Auth::id()]);
+
         return [
             'access_token' => $token,
             'token_type' => 'Bearer',

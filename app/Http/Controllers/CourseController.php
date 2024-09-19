@@ -10,6 +10,7 @@ use App\Services\Progress\ProgressServiceInterface;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class CourseController extends Controller
@@ -31,17 +32,20 @@ class CourseController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        Log::info('Fetching courses', ['request' => $request->all()]);
         try {
             $courses = $this->courseService->getCourses($request);
+            Log::info('Courses fetched successfully', ['courses_count' => count($courses)]);
             return $this->successResponse($courses);
         } catch (Exception $e) {
+            Log::error('Failed to fetch courses', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to fetch courses', 500);
         }
     }
 
-
     public function show(Request $request, Course $course): JsonResponse
     {
+        Log::info('Fetching course details', ['course_id' => $course->id]);
         try {
             $course = $this->courseService->getCourse($course);
             $progress = null;
@@ -51,17 +55,20 @@ class CourseController extends Controller
                 $progress = $progressService->getCourseProgress($request->user(), $course);
             }
 
+            Log::info('Course details retrieved successfully', ['course_id' => $course->id]);
             return $this->successResponse([
                 'course' => $course,
                 'progress' => $progress,
             ]);
         } catch (Exception $e) {
+            Log::error('Failed to retrieve course', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to retrieve course', 500);
         }
     }
 
     public function store(Request $request): JsonResponse
     {
+        Log::info('Creating a new course', ['request' => $request->all()]);
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
@@ -74,16 +81,20 @@ class CourseController extends Controller
             ]);
 
             $course = $this->courseService->createCourse($validatedData);
+            Log::info('Course created successfully', ['course_id' => $course->id]);
             return $this->successResponse($course, 'Course created successfully', 201);
         } catch (ValidationException $e) {
+            Log::error('Validation error during course creation', ['errors' => $e->errors()]);
             return $this->errorResponse($e->errors(), 422);
         } catch (\Exception $e) {
+            Log::error('Failed to create course', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to create course', 500);
         }
     }
 
     public function update(Request $request, Course $course): JsonResponse
     {
+        Log::info('Updating course', ['course_id' => $course->id, 'request' => $request->all()]);
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
@@ -102,40 +113,52 @@ class CourseController extends Controller
                 event(new CourseStatusChanged($course));
             }
 
+            Log::info('Course updated successfully', ['course_id' => $updatedCourse->id]);
             return $this->successResponse($updatedCourse, 'Course updated successfully');
         } catch (ValidationException $e) {
+            Log::error('Validation error during course update', ['errors' => $e->errors()]);
             return $this->errorResponse($e->errors(), 422);
         } catch (Exception $e) {
+            Log::error('Failed to update course', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to update course', 500);
         }
     }
 
     public function destroy(Course $course): JsonResponse
     {
+        Log::info('Deleting course', ['course_id' => $course->id]);
         try {
             $this->courseService->deleteCourse($course);
+            Log::info('Course deleted successfully', ['course_id' => $course->id]);
             return $this->successResponse(null, 'Course deleted successfully', 204);
         } catch (Exception $e) {
+            Log::error('Failed to delete course', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to delete course', 500);
         }
     }
 
     public function generateAccessCode(Course $course): JsonResponse
     {
+        Log::info('Generating access code for course', ['course_id' => $course->id]);
         try {
             $course = $this->courseService->setAccessCode($course);
+            Log::info('Access code generated successfully', ['course_id' => $course->id, 'access_code' => $course->access_code]);
             return $this->successResponse(['access_code' => $course->access_code], 'Access code generated successfully');
         } catch (Exception $e) {
+            Log::error('Failed to generate access code', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to generate access code', 500);
         }
     }
 
     public function removeAccessCode(Course $course): JsonResponse
     {
+        Log::info('Removing access code for course', ['course_id' => $course->id]);
         try {
             $course = $this->courseService->removeAccessCode($course);
+            Log::info('Access code removed successfully', ['course_id' => $course->id]);
             return $this->successResponse(null, 'Access code removed successfully');
         } catch (Exception $e) {
+            Log::error('Failed to remove access code', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to remove access code', 500);
         }
     }

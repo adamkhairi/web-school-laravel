@@ -12,3 +12,4 @@ Route::get('/mailable', function () {
     $user = User::first();
     return new UserActivationStatus($user, 'activated');
 });
+

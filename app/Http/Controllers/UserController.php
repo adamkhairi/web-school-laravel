@@ -34,10 +34,13 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        Log::info('Fetching users', ['request' => $request->all()]);
         try {
             $users = $this->userService->getUsers($request);
+            Log::info('Users fetched successfully', ['users_count' => count($users)]);
             return $this->successResponse($users);
         } catch (Exception $e) {
+            Log::error('Failed to fetch users', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to fetch users', 500);
         }
     }
@@ -50,9 +53,11 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
+        Log::info('Fetching user', ['user_id' => $user->id]);
         try {
             return $this->successResponse($user);
         } catch (Exception $e) {
+            Log::error('Failed to retrieve user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to retrieve user', 500);
         }
     }
@@ -65,10 +70,13 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
+        Log::info('Creating a new user', ['request' => $request->validated()]);
         try {
             $user = $this->userService->createUser($request->validated());
+            Log::info('User created successfully', ['user_id' => $user->id]);
             return $this->successResponse($user, 'User created successfully', 201);
         } catch (Exception $e) {
+            Log::error('Failed to create user', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to create user', 500);
         }
     }
@@ -82,10 +90,13 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
+        Log::info('Updating user', ['user_id' => $user->id, 'request' => $request->validated()]);
         try {
             $updatedUser = $this->userService->updateUser($user, $request->validated());
+            Log::info('User updated successfully', ['user_id' => $updatedUser->id]);
             return $this->successResponse($updatedUser, 'User updated successfully');
         } catch (Exception $e) {
+            Log::error('Failed to update user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to update user', 500);
         }
     }
@@ -98,10 +109,13 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
+        Log::info('Deleting user', ['user_id' => $user->id]);
         try {
             $this->userService->deleteUser($user);
+            Log::info('User deleted successfully', ['user_id' => $user->id]);
             return $this->successResponse(null, 'User deleted successfully', 204);
         } catch (Exception $e) {
+            Log::error('Failed to delete user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to delete user', 500);
         }
     }
@@ -114,14 +128,14 @@ class UserController extends Controller
      */
     public function toggleActivation(User $user): JsonResponse
     {
+        Log::info('Toggling user activation', ['user_id' => $user->id]);
         try {
             $message = $this->userService->toggleUserActivation($user);
-
-            // Fire user activation toggled event
             event(new UserActivationToggled($user));
-
+            Log::info('User activation toggled successfully', ['user_id' => $user->id]);
             return $this->successResponse($message, 200);
         } catch (Exception $e) {
+            Log::error('Failed to toggle user activation', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to toggle user activation', 500);
         }
     }
@@ -135,6 +149,7 @@ class UserController extends Controller
      */
     public function assignRole(Request $request, User $user): JsonResponse
     {
+        Log::info('Assigning role to user', ['user_id' => $user->id, 'request' => $request->all()]);
         try {
             $validatedData = $request->validate([
                 'role' => ['required', Rule::in(RoleType::values())],
@@ -143,17 +158,21 @@ class UserController extends Controller
             $role = RoleType::from($validatedData['role']);
 
             if ($this->userService->assignRole($user, $role)) {
+                Log::info('Role assigned successfully', ['user_id' => $user->id, 'role' => $role]);
                 return $this->successResponse(null, 'Role assigned successfully');
             } else {
+                Log::info('User already has this role', ['user_id' => $user->id, 'role' => $role]);
                 return $this->successResponse(null, 'User already has this role');
             }
         } catch (Exception $e) {
+            Log::error('Failed to assign role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to assign role', 500);
         }
     }
 
     public function removeRole(Request $request, User $user): JsonResponse
     {
+        Log::info('Removing role from user', ['user_id' => $user->id, 'request' => $request->all()]);
         try {
             $validatedData = $request->validate([
                 'role' => ['required', Rule::in(RoleType::values())],
@@ -162,32 +181,34 @@ class UserController extends Controller
             $role = RoleType::from($validatedData['role']);
 
             $this->userService->removeRole($user, $role);
+            Log::info('Role removed successfully', ['user_id' => $user->id, 'role' => $role]);
             return $this->successResponse(null, 'Role removed successfully');
         } catch (Exception $e) {
+            Log::error('Failed to remove role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to remove role', 500);
         }
     }
 
     public function getUserActivity(User $user): JsonResponse
     {
+        Log::info('Fetching user activity', ['user_id' => $user->id]);
         try {
             $activity = $this->userService->getUserActivity($user);
+            Log::info('User activity retrieved successfully', ['user_id' => $user->id]);
             return $this->successResponse($activity);
         } catch (Exception $e) {
-            // Log the error with details
             Log::error('Failed to retrieve user activity', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-    
-            // Return a more informative error response
             return $this->errorResponse('Failed to retrieve user activity: ' . $e->getMessage(), 500);
         }
     }
 
     public function bulkDelete(Request $request): JsonResponse
     {
+        Log::info('Bulk deleting users', ['request' => $request->all()]);
         try {
             $validatedData = $request->validate([
                 'user_ids' => 'required|array',
@@ -195,28 +216,36 @@ class UserController extends Controller
             ]);
 
             $this->userService->bulkDeleteUsers($validatedData['user_ids']);
-
+            Log::info('Users deleted successfully', ['user_ids' => $validatedData['user_ids']]);
             return $this->successResponse(null, 'Users deleted successfully');
         } catch (Exception $e) {
+            Log::error('Failed to delete users', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to delete users', 500);
         }
     }
 
     public function exportUsers(Request $request): StreamedResponse|JsonResponse
     {
+        Log::info('Exporting users');
         try {
-            return $this->userService->exportUsers();
+            $response = $this->userService->exportUsers();
+            Log::info('Users exported successfully');
+            return $response;
         } catch (Exception $e) {
+            Log::error('Failed to export users', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to export users', 500);
         }
     }
 
     public function getUserStats(): JsonResponse
     {
+        Log::info('Fetching user stats');
         try {
             $stats = $this->userService->getUserStats();
+            Log::info('User stats retrieved successfully');
             return $this->successResponse($stats);
         } catch (Exception $e) {
+            Log::error('Failed to retrieve user stats', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to retrieve user stats', 500);
         }
     }
