@@ -58,10 +58,10 @@ class AuthController extends Controller
         Log::info('Logout attempt');
         try {
             $this->authService->logout();
-            Log::info('Logout successful');
+            Log::info('Logout successful', [ ]);
             return $this->successResponse(null, 'Logout successful');
         } catch (ApiException $e) {
-            Log::error('API error during logout', ['message' => $e->getMessage()]);
+            Log::error('API error during logout', ['errors'=> $e->getMessage()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -71,6 +71,7 @@ class AuthController extends Controller
         Log::info('User data request');
         try {
             $userData = $this->authService->getUserData();
+            Log::info('User data retrieved', [ 'user' => $userData ]);
             return $this->successResponse(['user' => $userData]);
         } catch (ApiException $e) {
             Log::error('API error retrieving user data', ['message' => $e->getMessage()]);
@@ -133,11 +134,12 @@ class AuthController extends Controller
     {
         Log::info('Enable two-factor authentication attempt');
         try {
+            Log::info('Enabling two-factor authentication', ['user_id' => auth()->id()]);
             $result = $this->authService->enableTwoFactorAuth();
             Log::info('Two-factor authentication enabled');
             return $this->successResponse($result, 'Two-factor authentication enabled');
         } catch (ApiException $e) {
-            Log::error('API error enabling two-factor authentication', ['message' => $e->getMessage()]);
+            Log::error('Failed to enable two-factor authentication', ['error' => $e->getMessage(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -146,11 +148,12 @@ class AuthController extends Controller
     {
         Log::info('Disable two-factor authentication attempt');
         try {
+            Log::info('Disabling two-factor authentication', ['user_id' => auth()->id()]);
             $this->authService->disableTwoFactorAuth();
             Log::info('Two-factor authentication disabled');
             return $this->successResponse(null, 'Two-factor authentication disabled');
         } catch (ApiException $e) {
-            Log::error('API error disabling two-factor authentication', ['message' => $e->getMessage()]);
+            Log::error('Failed to disable two-factor authentication', ['error' => $e->getMessage(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -159,14 +162,15 @@ class AuthController extends Controller
     {
         Log::info('Verify two-factor authentication attempt');
         try {
+            Log::info('Verifying two-factor authentication', ['user_id' => auth()->id()]);
             $this->authService->verifyTwoFactorAuth($request);
             Log::info('Two-factor authentication verified');
             return $this->successResponse(null, 'Two-factor authentication verified');
         } catch (ValidationException $e) {
-            Log::error('Validation error during two-factor authentication verification', ['errors' => $e->errors()]);
+            Log::error('Validation error during two-factor authentication verification', ['errors' => $e->errors(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            Log::error('API error during two-factor authentication verification', ['message' => $e->getMessage()]);
+            Log::error('Failed to verify two-factor authentication', ['error' => $e->getMessage(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -188,11 +192,12 @@ class AuthController extends Controller
     {
         Log::info('Token refresh attempt');
         try {
+            Log::info('Refreshing token', ['user_id' => auth()->id()]);
             $result = $this->authService->refresh($request);
             Log::info('Token refreshed successfully');
             return $this->successResponse($result, 'Token refreshed successfully');
         } catch (ApiException $e) {
-            Log::error('API error during token refresh', ['message' => $e->getMessage()]);
+            Log::error('Failed to refresh token', ['error' => $e->getMessage(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -201,6 +206,7 @@ class AuthController extends Controller
     {
         Log::info('Email verification attempt');
         try {
+            Log::info('Verifying email', ['user_id' => auth()->id()]);
             $this->authService->verifyEmail($request);
             Log::info('Email verified successfully');
             return $this->successResponse(null, 'Email verified successfully');
@@ -208,7 +214,7 @@ class AuthController extends Controller
             Log::error('Validation error during email verification', ['errors' => $e->errors()]);
             return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            Log::error('API error during email verification', ['message' => $e->getMessage()]);
+            Log::error('Failed to verify email', ['error' => $e->getMessage(), 'user_id' => auth()->id()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -217,14 +223,15 @@ class AuthController extends Controller
     {
         Log::info('Assign role attempt', ['user_id' => $user->id]);
         try {
+            Log::info('Assigning role', ['user_id' => $user->id, 'role' => $request->input('role')]);
             $this->authService->assignRole($request, $user);
             Log::info('Role assigned successfully', ['user_id' => $user->id]);
             return $this->successResponse(null, 'Role assigned successfully');
         } catch (ValidationException $e) {
-            Log::error('Validation error during role assignment', ['errors' => $e->errors()]);
+            Log::error('Validation error during role assignment', ['errors' => $e->errors(), 'user_id' => $user->id]);
             return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            Log::error('API error during role assignment', ['message' => $e->getMessage()]);
+            Log::error('Failed to assign role', ['error' => $e->getMessage(), 'user_id' => $user->id]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -233,14 +240,15 @@ class AuthController extends Controller
     {
         Log::info('Remove role attempt', ['user_id' => $user->id]);
         try {
+            Log::info('Removing role from user ', ['user_id' => $user->id, 'role' => $request->input('role')]);
             $this->authService->removeRole($request, $user);
             Log::info('Role removed successfully', ['user_id' => $user->id]);
             return $this->successResponse(null, 'Role removed successfully');
         } catch (ValidationException $e) {
-            Log::error('Validation error during role removal', ['errors' => $e->errors()]);
+            Log::error('Validation error during role removal', ['errors' => $e->errors(), 'user_id' => $user->id]);
             return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
-            Log::error('API error during role removal', ['message' => $e->getMessage()]);
+            Log::error('Failed to remove role', ['error' => $e->getMessage(), 'user_id' => $user->id]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
