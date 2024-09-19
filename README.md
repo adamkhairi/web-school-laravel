@@ -28,7 +28,7 @@
 #### 1.1.1 User Management Module
 
 - [x] Implement user model with fields: id, username, email, password_hash, role, created_at, updated_at
-- [ ] Develop user registration endpoint with email verification
+- [x] Develop user registration endpoint with email verification
 - [x] Create login endpoint with JWT token generation
 - [ ] Implement password reset functionality
 - [x] Develop user profile CRUD operations

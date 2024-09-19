@@ -9,6 +9,8 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Lesson\LessonServiceInterface;
+use Exception;
+use Illuminate\Validation\ValidationException;
 
 class LessonController extends Controller
 {
@@ -33,9 +35,9 @@ class LessonController extends Controller
     {
         try {
             $lessons = $this->lessonService->getLessons($request, $course);
-            return response()->json($lessons);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to fetch lessons: ' . $e->getMessage(), 500);
+            return $this->successResponse($lessons);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to fetch lessons: ' . $e->getMessage(), 500);
         }
     }
 
@@ -54,9 +56,11 @@ class LessonController extends Controller
             // Trigger event for new lesson
             event(new NewLessonCreated($lesson));
 
-            return response()->json($lesson, 201);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to create lesson: ' . $e->getMessage(), 500);
+            return $this->successResponse($lesson, 'Lesson created successfully', 201);
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to create lesson: ' . $e->getMessage(), 500);
         }
     }
 
@@ -71,9 +75,11 @@ class LessonController extends Controller
             ]);
 
             $updatedLesson = $this->lessonService->updateLesson($lesson, $validatedData);
-            return response()->json($updatedLesson);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to update lesson: ' . $e->getMessage(), 500);
+            return $this->successResponse($updatedLesson, 'Lesson updated successfully');
+        } catch (ValidationException $e) {
+            return $this->errorResponse($e->errors(), 422);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to update lesson: ' . $e->getMessage(), 500);
         }
     }
 
@@ -81,9 +87,9 @@ class LessonController extends Controller
     {
         try {
             $this->lessonService->deleteLesson($lesson);
-            return response()->json(null, 204);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to delete lesson: ' . $e->getMessage(), 500);
+            return $this->successResponse(null, 'Lesson deleted successfully', 204);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to delete lesson: ' . $e->getMessage(), 500);
         }
     }
 
@@ -95,9 +101,9 @@ class LessonController extends Controller
             // Trigger event for lesson completion
             event(new LessonCompleted($request->user(), $lesson));
 
-            return response()->json($progress);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to mark lesson as completed: ' . $e->getMessage(), 500);
+            return $this->successResponse($progress, 'Lesson marked as completed successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to mark lesson as completed: ' . $e->getMessage(), 500);
         }
     }
 
@@ -105,9 +111,9 @@ class LessonController extends Controller
     {
         try {
             $progress = $this->lessonService->markLessonAsIncomplete($request->user(), $course, $lesson);
-            return response()->json($progress);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to mark lesson as incomplete: ' . $e->getMessage(), 500);
+            return $this->successResponse($progress, 'Lesson marked as incomplete successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to mark lesson as incomplete: ' . $e->getMessage(), 500);
         }
     }
 }

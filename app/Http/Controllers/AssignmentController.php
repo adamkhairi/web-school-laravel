@@ -23,9 +23,9 @@ class AssignmentController extends Controller
     {
         try {
             $assignments = $this->assignmentService->getAssignments($request, $courseId);
-            return response()->json($assignments);
+            return $this->successResponse($assignments);
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to fetch assignments: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to fetch assignments: ' . $e->getMessage(), 500);
         }
     }
 
@@ -35,7 +35,6 @@ class AssignmentController extends Controller
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
-                'due_date' => 'required|date',
                 'max_score' => 'required|integer|min:0',
             ]);
 
@@ -45,9 +44,9 @@ class AssignmentController extends Controller
             // Trigger event for new assignment
             event(new NewAssignmentCreated($assignment));
 
-            return response()->json($assignment, 201);
+            return $this->successResponse($assignment, 'Assignment created successfully', 201);
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to create assignment: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to create assignment: ' . $e->getMessage(), 500);
         }
     }
 
@@ -62,9 +61,9 @@ class AssignmentController extends Controller
             ]);
 
             $updatedAssignment = $this->assignmentService->updateAssignment($assignment, $validatedData);
-            return response()->json($updatedAssignment);
+            return $this->successResponse($updatedAssignment, 'Assignment updated successfully');
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to update assignment: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to update assignment: ' . $e->getMessage(), 500);
         }
     }
 
@@ -72,9 +71,9 @@ class AssignmentController extends Controller
     {
         try {
             $this->assignmentService->deleteAssignment($assignment);
-            return response()->json(null, 204);
+            return $this->successResponse(null, 'Assignment deleted successfully', 204);
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to delete assignment: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to delete assignment: ' . $e->getMessage(), 500);
         }
     }
 
@@ -86,9 +85,9 @@ class AssignmentController extends Controller
             ]);
 
             $submission = $this->assignmentService->submitAssignment($request, $assignment);
-            return response()->json($submission, 201);
+            return $this->successResponse($submission, 'Assignment submitted successfully', 201);
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to submit assignment: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to submit assignment: ' . $e->getMessage(), 500);
         }
     }
 
@@ -105,19 +104,9 @@ class AssignmentController extends Controller
             // Trigger event for submission graded
             event(new SubmissionGraded($gradedSubmission));
 
-            return response()->json($gradedSubmission);
+            return $this->successResponse($gradedSubmission, 'Submission graded successfully');
         } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to grade submission: ' . $e->getMessage(), 500);
-        }
-    }
-
-    public function submissions(Assignment $assignment): JsonResponse
-    {
-        try {
-            $submissions = $this->assignmentService->getSubmissions($assignment);
-            return response()->json($submissions);
-        } catch (\Exception $e) {
-            return $this->sendFailedResponse('Failed to fetch submissions: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to grade submission: ' . $e->getMessage(), 500);
         }
     }
 }

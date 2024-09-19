@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\Notification\NotificationServiceInterface;
-use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
+use Exception;
+use Illuminate\Http\JsonResponse;
 
 class NotificationController extends Controller
 {
@@ -28,16 +29,23 @@ class NotificationController extends Controller
         $this->notificationService = $notificationService;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-       
-        $notifications = $this->notificationService->getUserNotifications($request);
-        return $this->successResponse($notifications);
+        try {
+            $notifications = $this->notificationService->getUserNotifications($request);
+            return $this->successResponse($notifications);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to fetch notifications: ' . $e->getMessage(), 500);
+        }
     }
 
-    public function markAsRead($id)
+    public function markAsRead($id): JsonResponse
     {
-        $notification = $this->notificationService->markAsRead($id);
-        return $this->successResponse($notification, 'Notification marked as read');
+        try {
+            $notification = $this->notificationService->markAsRead($id);
+            return $this->successResponse($notification, 'Notification marked as read');
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to mark notification as read: ' . $e->getMessage(), 500);
+        }
     }
 }
