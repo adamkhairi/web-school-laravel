@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
@@ -15,6 +16,8 @@ class Handler extends ExceptionHandler
         if ($request->expectsJson()) {
             return $this->handleApiException($request, $exception);
         }
+
+        Log::error('An error occurred', ['exception' => $exception]);
 
         return parent::render($request, $exception);
     }

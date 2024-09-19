@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Exceptions\ApiException;
 use App\Services\Auth\AuthServiceInterface;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -24,10 +25,13 @@ class AuthController extends Controller
     {
         try {
             $result = $this->authService->login($request);
+            Log::info('Login successful', ['email' => $request->email]);
             return $this->successResponse($result, 'Login successful');
         } catch (ValidationException $e) {
+            Log::error('Validation error during login', ['errors' => $e->errors()]);
             return $this->errorResponse($e->errors(), 422);
         } catch (ApiException $e) {
+            Log::error('API error during login', ['message' => $e->getMessage()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
