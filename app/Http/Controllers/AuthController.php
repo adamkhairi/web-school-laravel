@@ -58,10 +58,10 @@ class AuthController extends Controller
         Log::info('Logout attempt');
         try {
             $this->authService->logout();
-            Log::info('Logout successful', [ ]);
+            Log::info('Logout successful', []);
             return $this->successResponse(null, 'Logout successful');
         } catch (ApiException $e) {
-            Log::error('API error during logout', ['errors'=> $e->getMessage()]);
+            Log::error('API error during logout', ['errors' => $e->getMessage()]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
@@ -71,7 +71,7 @@ class AuthController extends Controller
         Log::info('User data request');
         try {
             $userData = $this->authService->getUserData();
-            Log::info('User data retrieved', [ 'user' => $userData ]);
+            Log::info('User data retrieved', ['user' => $userData]);
             return $this->successResponse(['user' => $userData]);
         } catch (ApiException $e) {
             Log::error('API error retrieving user data', ['message' => $e->getMessage()]);
