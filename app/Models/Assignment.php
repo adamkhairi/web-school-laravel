@@ -30,4 +30,9 @@ class Assignment extends Model
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function averageGrade()
+    {
+        return $this->submissions()->avg('grade');
+    }
 }

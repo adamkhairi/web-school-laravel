@@ -10,6 +10,7 @@ use App\Services\Assignment\AssignmentServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AssignmentController extends Controller
 {
@@ -113,7 +114,7 @@ class AssignmentController extends Controller
         try {
             $validatedData = $request->validate([
                 'grade' => 'required|integer|min:0|max:' . $submission->assignment->max_score,
-                'feedback' => 'nullable|string',
+                'feedback' => 'nullable|string|max:500', // Validate feedback
             ]);
 
             $gradedSubmission = $this->assignmentService->gradeSubmission($submission, $validatedData);
@@ -123,6 +124,9 @@ class AssignmentController extends Controller
 
             Log::info('Submission graded successfully', ['submission_id' => $gradedSubmission->id]);
             return $this->successResponse($gradedSubmission, 'Submission graded successfully');
+        } catch (ValidationException $e) {
+            Log::error('Validation failed while grading submission', ['errors' => $e->errors()]);
+            return $this->errorResponse('Validation failed: ' . implode(', ', $e->errors()), 422);
         } catch (\Exception $e) {
             Log::error('Failed to grade submission', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to grade submission: ' . $e->getMessage(), 500);

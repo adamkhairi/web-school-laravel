@@ -67,7 +67,10 @@ class AssignmentService implements AssignmentServiceInterface
 
     public function gradeSubmission(Submission $submission, array $data)
     {
-        $submission->update($data);
+        $submission->update([
+            'grade' => $data['grade'],
+            'feedback' => $data['feedback'] ?? null, // Handle feedback
+        ]);
         return $submission;
     }
 

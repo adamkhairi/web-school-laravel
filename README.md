@@ -44,22 +44,22 @@
 - [x] Implement course planning functionality for teachers
 - [x] Add ability to create a course in "planned" status
 - [x] Develop endpoints to update course details and status
-- [ ] Create functionality to generate and manage course access codes
+- [x] Create functionality to generate and manage course access codes
 
 #### 1.1.3 Student Enrollment Module
 
 - [x] Develop endpoints for teachers to add students to planned courses
-- [ ] Implement functionality for students to join courses using access codes
+- [x] Implement functionality for students to join courses using access codes
 - [ ] Create waitlist functionality for courses with limited capacity
-- [ ] Develop notification system for course enrollment status changes.
+- [x] Develop notification system for course enrollment status changes.
 
 #### 1.1.4 Assignment and Grading System
 
 - [x] Implement assignment model with fields: id, course_id, title, description, due_date, max_score, created_at, updated_at
 - [x] Develop assignment CRUD operations
-- [ ] Create submission model and implement submission process
-- [ ] Develop grading system with feedback functionality
-- [ ] Implement grade calculation and reporting
+- [x] Create submission model and implement submission process
+- [x] Develop grading system with feedback functionality
+- [x] Implement grade calculation and reporting
 
 #### 1.1.5 Attendance Tracking Module
 
