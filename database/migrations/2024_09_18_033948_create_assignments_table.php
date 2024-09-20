@@ -13,6 +13,7 @@ class CreateAssignmentsTable extends Migration
             $table->string('title');
             $table->text('description');
             $table->timestamp('due_date');
+            $table->integer('max_score')->default(100);
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');

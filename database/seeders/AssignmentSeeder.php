@@ -13,7 +13,7 @@ class AssignmentSeeder extends Seeder
         $courses = Course::all();
 
         foreach ($courses as $course) {
-            $assignmentCount = fake()->numberBetween(3, 8);
+            $assignmentCount = fake()->numberBetween(5, 15);
 
             for ($i = 1; $i <= $assignmentCount; $i++) {
                 Assignment::create([

@@ -17,7 +17,7 @@ class ProgressSeeder extends Seeder
         $studentRole = Role::where('name', RoleType::Student->value)->first();
         $students = User::whereHas('roles', function ($query) use ($studentRole) {
             $query->where('roles.id', $studentRole->id);
-        })->inRandomOrder()->limit(10)->get();
+        })->inRandomOrder()->limit(15)->get();
 
         $courses = Course::all();
 

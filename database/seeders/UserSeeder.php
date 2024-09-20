@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
         $student->roles()->attach($studentRole);
 
         // Create additional users with random roles
-        User::factory(25)->create()->each(function ($user) use ($adminRole, $teacherRole, $studentRole) {
+        User::factory(100)->create()->each(function ($user) use ($adminRole, $teacherRole, $studentRole) {
             $user->roles()->attach(
                 fake()->randomElement([$adminRole, $teacherRole, $studentRole])
             );

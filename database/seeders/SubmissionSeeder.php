@@ -17,7 +17,7 @@ class SubmissionSeeder extends Seeder
         })->get();
 
         foreach ($assignments as $assignment) {
-            $submissionCount = fake()->numberBetween(5, 15);
+            $submissionCount = fake()->numberBetween(10, 25);
 
             for ($i = 1; $i <= $submissionCount; $i++) {
                 Submission::create([

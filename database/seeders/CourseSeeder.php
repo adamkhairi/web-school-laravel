@@ -26,6 +26,6 @@ class CourseSeeder extends Seeder
 
 
         // Create some additional random courses
-        Course::factory(10)->create();
+        Course::factory(25)->create();
     }
 }

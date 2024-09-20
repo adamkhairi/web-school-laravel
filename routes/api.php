@@ -217,6 +217,7 @@ Route::middleware('auth:sanctum')->group(function () {
             // GET /api/assignments/{assignment}/submissions
             Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->can('viewSubmissions', Assignment::class)->name('assignments.submissions');
 
+            //TODO: Fix this 404 Not found error
             // POST /api/submissions/{submission}/grade
             // Example: {"grade": 95, "feedback": "Excellent work!"}
             Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->can('grade', Assignment::class)->name('assignments.grade');
