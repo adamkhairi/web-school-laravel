@@ -6,8 +6,10 @@ use App\Enums\CourseStatus;
 use App\Events\CourseStatusChanged;
 use App\Models\Course;
 use App\Services\Course\CourseServiceInterface;
+use App\Services\Enrollment\EnrollmentServiceInterface;
 use App\Services\Progress\ProgressServiceInterface;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -150,6 +152,7 @@ class CourseController extends Controller
         }
     }
 
+
     public function removeAccessCode(Course $course): JsonResponse
     {
         Log::info('Removing access code for course', ['course_id' => $course->id]);
@@ -160,6 +163,26 @@ class CourseController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to remove access code', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to remove access code', 500);
+        }
+    }
+
+    public function joinCourse(Request $request): JsonResponse
+    {
+        Log::info('Student attempting to join course', ['request' => $request->all()]);
+        $request->validate([
+            'access_code' => 'required|string',
+        ]);
+        try {
+
+            $course = Course::where('access_code', $request->access_code)->firstOrFail();
+            $enrollmentService = app(EnrollmentServiceInterface::class);
+            $result = $enrollmentService->enrollInCourse($course);
+            return $this->successResponse($result, 'Successfully joined the course', 201);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Invalid access code', 404);
+        } catch (Exception $e) {
+            Log::error('Failed to join course', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Failed to join course', 500);
         }
     }
 }

@@ -15,5 +15,6 @@ interface CourseServiceInterface
     public function generateAccessCode();
     public function setAccessCode(Course $course);
     public function removeAccessCode(Course $course);
+    public function enrollInCourse(Course $course);
 
 }

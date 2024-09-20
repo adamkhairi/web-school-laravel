@@ -14,4 +14,5 @@ interface EnrollmentServiceInterface
     public function getCourseEnrollments(Course $course);
     public function withdrawEnrollment(Enrollment $enrollment);
     public function getEnrollmentStatistics(Course $course);
+    public function enrollInCourse(Course $course);
 }

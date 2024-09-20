@@ -93,4 +93,33 @@ class EnrollmentService implements EnrollmentServiceInterface
             'available_slots' => $course->capacity - $course->enrollments()->approved()->count(),
         ];
     }
+
+    public function enrollInCourse(Course $course)
+    {
+        $user = auth()->user();
+
+        // Check if the user is already enrolled
+        $existingEnrollment = Enrollment::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if ($existingEnrollment) {
+            return ['message' => 'You are already enrolled in this course', 'status' => 422];
+        }
+
+        // Check if the course has reached its capacity
+        $enrolledCount = $course->enrollments()->count();
+        if ($enrolledCount >= $course->capacity) {
+            return ['message' => 'This course has reached its maximum capacity', 'status' => 422];
+        }
+
+        $enrollment = Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'status' => EnrollmentStatus::Pending,
+            'enrolled_at' => now(),
+        ]);
+
+        return ['message' => 'Successfully enrolled', 'enrollment' => $enrollment];
+    }
 }

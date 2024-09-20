@@ -4,6 +4,8 @@ namespace App\Services\Course;
 
 use App\Models\Course;
 use App\Enums\CourseStatus;
+use App\Enums\EnrollmentStatus;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -101,5 +103,15 @@ class CourseService implements CourseServiceInterface
         $course->access_code = null;
         $course->save();
         return $course;
+    }
+
+    public function enrollInCourse(Course $course)
+    {
+        $user = auth()->user();
+        return Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'status' => EnrollmentStatus::Approved,
+        ]);
     }
 }

@@ -160,6 +160,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // DELETE /api/courses/{course}/access-code
         Route::delete('/{course}/access-code', [CourseController::class, 'removeAccessCode'])->name('courses.removeAccessCode');
 
+        // POST /api/courses/{course}/join
+        // Example: {"access_code": "123456"}
+        Route::post('/join', [CourseController::class, 'joinCourse'])->name('courses.join');
 
         // Lesson Management
         // GET /api/courses/{course}/lessons
