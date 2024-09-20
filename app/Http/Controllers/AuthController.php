@@ -8,17 +8,24 @@ use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use App\Exceptions\ApiException;
 use App\Services\Auth\AuthServiceInterface;
+use App\Services\Auth\OAuthServiceInterface;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
 
     protected $authService;
+    protected $oauthService;
 
-    public function __construct(AuthServiceInterface $authService)
+    public function __construct(AuthServiceInterface $authService, OAuthServiceInterface $oauthService)
     {
         $this->authService = $authService;
+        $this->oauthService = $oauthService;
     }
 
     public function login(Request $request): JsonResponse
@@ -250,6 +257,44 @@ class AuthController extends Controller
         } catch (ApiException $e) {
             Log::error('Failed to remove role', ['error' => $e->getMessage(), 'user_id' => $user->id]);
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+        }
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            $user = $this->oauthService->handleGoogleCallback($googleUser);
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse(['access_token' => $token, 'token_type' => 'Bearer'], 'Login successful');
+        } catch (Exception $e) {
+            Log::error('Google login error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Login failed', 500);
+        }
+    }
+
+    public function redirectToMicrosoft()
+    {
+        return Socialite::driver('microsoft')->redirect();
+    }
+
+    public function handleMicrosoftCallback()
+    {
+        try {
+            $microsoftUser = Socialite::driver('microsoft')->user();
+            $user = $this->oauthService->handleMicrosoftCallback($microsoftUser);
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse(['access_token' => $token, 'token_type' => 'Bearer'], 'Login successful');
+        } catch (Exception $e) {
+            Log::error('Microsoft login error', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Login failed', 500);
         }
     }
 

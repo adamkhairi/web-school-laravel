@@ -12,6 +12,8 @@ use App\Services\Assignment\AssignmentServiceInterface;
 use App\Services\Assignment\AssignmentService;
 use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthServiceInterface;
+use App\Services\Auth\OAuthService;
+use App\Services\Auth\OAuthServiceInterface;
 use App\Services\User\UserService;
 use App\Services\User\UserServiceInterface;
 use App\Services\Course\CourseServiceInterface;
@@ -48,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Inject dependencies
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
+        $this->app->bind(OAuthServiceInterface::class, OAuthService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
         $this->app->bind(CourseServiceInterface::class, CourseService::class);
         $this->app->bind(LessonServiceInterface::class, LessonService::class);
