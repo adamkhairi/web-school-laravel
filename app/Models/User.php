@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Enums\RoleType;
+use App\Exceptions\ApiException;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -62,10 +63,15 @@ class User extends Authenticatable implements JWTSubject
 
     public function assignRole(RoleType $role): void
     {
-        if (!$this->hasRole($role)) {
-            $roleModel = Role::where('name', $role->value)->firstOrFail();
-            $this->roles()->attach($roleModel->id);
+        if ($this->hasRole($role)) {
+            return; // Early return if the user already has the role
         }
+
+        $roleModel = Role::where('name', $role->value)->firstOr(function () use ($role) {
+            throw new ApiException("Role '{$role->value}' not found.", 404);
+        });
+
+        $this->roles()->attach($roleModel->id);
     }
 
     public function enrollments()

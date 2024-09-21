@@ -129,8 +129,8 @@ Route::prefix('v1')->group(function () {
             // Example: {"name": "New Role"}
             Route::post('/roles', [UserController::class, 'storeRole'])->name('roles.store');
 
-            // GET /api/v1/users/roles/{role}
-            Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('roles.destroy');
+            // DELETE /api/v1/users/roles/{role_type}
+            Route::delete('/roles/{role_type}', [UserController::class, 'destroyRole'])->name('roles.destroy');
 
             // Todo: Need To Fix this function
             // GET /api/v1/users/stats

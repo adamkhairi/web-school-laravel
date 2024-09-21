@@ -29,7 +29,7 @@ class Enrollment extends Model
 
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', EnrollmentStatus::Approved->value);
     }
 
     public function scopePending($query)

@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -152,24 +153,30 @@ class UserController extends Controller
     public function assignRole(Request $request, User $user): JsonResponse
     {
         Log::info('Assigning role to user', ['user_id' => $user->id, 'request' => $request->all()]);
+
+        // Validate the request data
+        $validatedData = $request->validate([
+            'role' => ['required', Rule::in(RoleType::values())],
+        ]);
+
+        $role = RoleType::from($validatedData['role']);
+
         try {
-            $validatedData = $request->validate([
-                'role' => ['required', Rule::in(RoleType::values())],
-            ]);
-
-            $role = RoleType::from($validatedData['role']);
-
+            // Attempt to assign the role
             if ($this->userService->assignRole($user, $role)) {
                 Log::info('Role assigned successfully', ['user_id' => $user->id, 'role' => $role]);
                 return $this->successResponse(null, 'Role assigned successfully');
-            } else {
-                Log::info('User already has this role', ['user_id' => $user->id, 'role' => $role]);
-                return $this->successResponse(null, 'User already has this role');
             }
+
+            Log::info('User already has this role', ['user_id' => $user->id, 'role' => $role]);
+            return $this->successResponse(null, 'User already has this role');
         } catch (Exception $e) {
             Log::error('Failed to assign role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            return $this->errorResponse('Failed to assign role: ' . $e->getMessage(), 500);
+        } /* catch (Throwable $e) {
+            Log::error('Failed to assign role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return $this->errorResponse('Failed to assign role', 500);
-        }
+        } */
     }
 
     public function removeRole(Request $request, User $user): JsonResponse
@@ -255,10 +262,12 @@ class UserController extends Controller
         }
     }
 
-    public function destroyRole(RoleType $role): JsonResponse
+    //TODO: Need to be fixed
+    public function destroyRole(Request $request): JsonResponse
     {
-        Log::info('Deleting role', ['role' => $role->value]);
+        Log::info('Deleting role', ['role' => $request->input('role')]);
         try {
+            $role = RoleType::from($request->input('role'));
             $this->userService->deleteRole($role);
             Log::info('Role deleted successfully', ['role' => $role->value]);
             return $this->successResponse(null, 'Role deleted successfully', 204);

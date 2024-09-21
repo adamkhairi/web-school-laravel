@@ -52,7 +52,7 @@ class EnrollmentService implements EnrollmentServiceInterface
             return ['message' => 'You have been added to the waitlist', 'enrollment' => $waitlistEnrollment, 'status' => 201];
         }
     }
-    
+
     public function getWaitlistedStudents(Course $course)
     {
         return $course->enrollments()->where('status', EnrollmentStatus::Waitlisted)->with('user')->get();
@@ -71,7 +71,7 @@ class EnrollmentService implements EnrollmentServiceInterface
             // You can implement a notification system here
         }
 
-        return ['message' => 'Enrollment status updated successfully', 'enrollment' => $enrollment];
+        return ['enrollment' => $enrollment];
     }
 
     public function getStudentEnrollments()
