@@ -27,7 +27,7 @@ class Course extends Model
         'start_date' => 'date',
         'end_date' => 'date',
     ];
-    
+
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
@@ -38,12 +38,17 @@ class Course extends Model
         return $this->hasMany(Enrollment::class);
     }
 
+    public function waitlistedStudents()
+    {
+        return $this->enrollments()->where('status', EnrollmentStatus::Waitlisted)->with('user')->get();
+    }
+
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
     }
 
-   public function students()
+    public function students()
     {
         return $this->belongsToMany(User::class, 'enrollments')
             ->wherePivot('status', EnrollmentStatus::Approved);
@@ -67,7 +72,7 @@ class Course extends Model
                 $query->where('user_id', $user->id)->where('completed', true);
             })
             ->count();
-    
+
         return $totalLessons > 0 ? ($completedLessons / $totalLessons) * 100 : 0;
     }
 }

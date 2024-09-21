@@ -251,11 +251,14 @@ Route::prefix('v1')->group(function () {
             // Example: {"status": "completed"}
             Route::put('/{enrollment}', [EnrollmentController::class, 'updateEnrollmentStatus'])->name('enrollments.updateStatus');
 
+            // GET /api/v1/enrollments/courses/{course}/waitlist
+            Route::get('/courses/{course}/waitlist', [EnrollmentController::class, 'getWaitlistedStudents'])->name('enrollments.waitlist');
+            
             // GET /api/v1/enrollments/student
             Route::get('/student', [EnrollmentController::class, 'getStudentEnrollments'])->name('enrollments.student');
 
             // GET /api/v1/enrollments/course/{course}
-            Route::get('/course/{course}', [EnrollmentController::class, 'getCourseEnrollments'])->name('enrollments.course');
+            Route::get('/courses/{course}', [EnrollmentController::class, 'getCourseEnrollments'])->name('enrollments.course');
 
             // DELETE /api/v1/enrollments/{enrollment}
             Route::delete('/{enrollment}', [EnrollmentController::class, 'withdrawEnrollment'])->name('enrollments.withdraw');

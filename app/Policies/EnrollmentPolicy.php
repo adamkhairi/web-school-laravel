@@ -26,7 +26,7 @@ class EnrollmentPolicy
 
     public function enroll(User $user): bool
     {
-        return $user->hasRole(RoleType::Student);
+        return $user->hasRole(RoleType::Student) || $user->hasRole(RoleType::Admin);
     }
 
     public function withdraw(User $user, Enrollment $enrollment): bool

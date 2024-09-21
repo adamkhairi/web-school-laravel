@@ -33,18 +33,29 @@ class EnrollmentService implements EnrollmentServiceInterface
 
         // Check if the course has reached its capacity
         $enrolledCount = $course->enrollments()->count();
-        if ($enrolledCount >= $course->capacity) {
-            return ['message' => 'This course has reached its maximum capacity', 'status' => 422];
+        if ($enrolledCount < $course->capacity) {
+            $enrollment = Enrollment::create([
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'status' => EnrollmentStatus::Pending,
+                'enrolled_at' => now(),
+            ]);
+            return ['message' => 'Enrollment request submitted successfully', 'enrollment' => $enrollment, 'status' => 201];
+        } else {
+            // Add to waitlist
+            $waitlistEnrollment = Enrollment::create([
+                'user_id' => $user->id,
+                'course_id' => $course->id,
+                'status' => EnrollmentStatus::Waitlisted,
+                'enrolled_at' => now(),
+            ]);
+            return ['message' => 'You have been added to the waitlist', 'enrollment' => $waitlistEnrollment, 'status' => 201];
         }
-
-        $enrollment = Enrollment::create([
-            'user_id' => $user->id,
-            'course_id' => $course->id,
-            'status' => EnrollmentStatus::Pending,
-            'enrolled_at' => now(),
-        ]);
-
-        return ['message' => 'Enrollment request submitted successfully', 'enrollment' => $enrollment, 'status' => 201];
+    }
+    
+    public function getWaitlistedStudents(Course $course)
+    {
+        return $course->enrollments()->where('status', EnrollmentStatus::Waitlisted)->with('user')->get();
     }
 
     public function updateEnrollmentStatus(Request $request, Enrollment $enrollment)

@@ -257,11 +257,7 @@ class AuthController extends Controller
         }
     }
 
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')->redirect();
-    }
-
+    // Todo:Fix external logins
     public function handleGoogleCallback()
     {
         try {
@@ -276,9 +272,9 @@ class AuthController extends Controller
         }
     }
 
-    public function redirectToMicrosoft()
+    public function redirectToGoogle()
     {
-        return Socialite::driver('microsoft')->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     public function handleMicrosoftCallback()
@@ -293,6 +289,11 @@ class AuthController extends Controller
             Log::error('Microsoft login error', ['error' => $e->getMessage()]);
             return $this->errorResponse('Login failed', 500);
         }
+    }
+
+    public function redirectToMicrosoft()
+    {
+        return Socialite::driver('microsoft')->redirect();
     }
 
     // 9. Social Authentication

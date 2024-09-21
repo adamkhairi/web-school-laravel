@@ -38,7 +38,18 @@ class EnrollmentController extends Controller
     {
         Log::info('Attempting to enroll', ['request' => $request->all()]);
 
-        if (Gate::denies('enroll', Course::class)) {
+        // Check if the user is authenticated
+        if (!$request->user()) {
+            Log::warning('Unauthorized enrollment attempt: No user found');
+            return $this->errorResponse('Unauthorized: No user found', 403);
+        }
+
+        // Log user roles for debugging
+        Log::info('User roles', ['roles' => $request->user()->roles()->pluck('name')->toArray()]);
+
+        // Check if the user has the necessary permissions
+        $course = Course::findOrFail($request->input('course_id')); // Ensure you have the course instance
+        if (Gate::denies('enroll', $course)) {
             Log::warning('Unauthorized enrollment attempt', ['user_id' => $request->user()->id]);
             return $this->errorResponse('Unauthorized', 403);
         }
@@ -50,6 +61,16 @@ class EnrollmentController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to submit enrollment request', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to submit enrollment request: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function getWaitlistedStudents(Course $course): JsonResponse
+    {
+        try {
+            $waitlistedStudents = $this->enrollmentService->getWaitlistedStudents($course);
+            return $this->successResponse($waitlistedStudents);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to fetch waitlisted students: ' . $e->getMessage(), 500);
         }
     }
 

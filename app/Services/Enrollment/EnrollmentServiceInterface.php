@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 interface EnrollmentServiceInterface
 {
     public function enroll(Request $request);
+    public function getWaitlistedStudents(Course $course);
     public function updateEnrollmentStatus(Request $request, Enrollment $enrollment);
     public function getStudentEnrollments();
     public function getCourseEnrollments(Course $course);

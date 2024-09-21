@@ -9,6 +9,7 @@ use App\Models\Submission;
 use App\Services\Assignment\AssignmentServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -61,6 +62,12 @@ class AssignmentController extends Controller
     public function update(Request $request, Assignment $assignment): JsonResponse
     {
         Log::info('Updating assignment ID: ' . $assignment->id);
+
+        if (!Gate::allows('update', $assignment)) {
+            Log::warning('Unauthorized update attempt', ['user_id' => $request->user()->id, 'assignment_id' => $assignment->id]);
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         try {
             $validatedData = $request->validate([
                 'title' => 'sometimes|required|string|max:255',

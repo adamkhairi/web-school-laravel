@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Assignment;
+use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Submission;
 use App\Policies\AssignmentPolicy;
+use App\Policies\CoursePolicy;
 use App\Policies\EnrollmentPolicy;
 use App\Policies\SubmissionPolicy;
 use App\Repositories\Auth\AuthRepository;
@@ -33,6 +35,7 @@ use App\Services\Progress\ProgressService;
 use App\Services\Progress\ProgressServiceInterface;
 use App\Services\Submission\SubmissionService;
 use App\Services\Submission\SubmissionServiceInterface;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,11 +45,6 @@ class AppServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $policies = [
-        Enrollment::class => EnrollmentPolicy::class,
-        Assignment::class => AssignmentPolicy::class,
-        Submission::class => SubmissionPolicy::class
-    ];
 
     /**
      * Register any application services.
@@ -76,6 +74,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Policies 
+        Gate::policy(Course::class, CoursePolicy::class);
+        Gate::policy(Enrollment::class, EnrollmentPolicy::class);
+        Gate::policy(Assignment::class, AssignmentPolicy::class);
+        Gate::policy(Submission::class, SubmissionPolicy::class);
+
     }
 }
