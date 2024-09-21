@@ -20,4 +20,6 @@ interface UserServiceInterface
     public function bulkDeleteUsers(array $userIds);
     public function exportUsers(): StreamedResponse;
     public function getUserStats(): array;
+    public function addRole(array $data);
+    public function deleteRole(RoleType $role);
 }

@@ -21,7 +21,7 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/notifications",
+          "raw": "{{base_url}}/api/v1/notifications",
           "host": ["{{base_url}}"],
           "path": ["api", "notifications"],
           "query": [
@@ -76,7 +76,7 @@
           "raw": "{\n    \"read\": true\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/notifications/1/read",
+          "raw": "{{base_url}}/api/v1/notifications/1/read",
           "host": ["{{base_url}}"],
           "path": ["api", "notifications", "1", "read"]
         }

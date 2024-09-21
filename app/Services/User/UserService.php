@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class UserService implements UserServiceInterface
 {
@@ -151,6 +153,23 @@ class UserService implements UserServiceInterface
     };
 
     return response()->stream($callback, 200, $headers);
+  }
+
+
+  public function addRole(array $data)
+  {
+    $validatedData = Validator::make($data, [
+      'name' => 'required|string|unique:roles,name',
+      'description' => 'nullable|string',
+    ])->validate();
+
+    return Role::create($validatedData);
+  }
+
+  public function deleteRole(RoleType $role)
+  {
+    $roleModel = Role::where('name', $role->value)->firstOrFail();
+    return $roleModel->delete();
   }
 
   //TODO: Need Fixing this function 

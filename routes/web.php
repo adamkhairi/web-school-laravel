@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Mail\UserActivationStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;

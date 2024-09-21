@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Events\NewAssignmentCreated;
 use App\Events\SubmissionGraded;
 use App\Models\Assignment;
 use App\Models\Submission;
 use App\Services\Assignment\AssignmentServiceInterface;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 

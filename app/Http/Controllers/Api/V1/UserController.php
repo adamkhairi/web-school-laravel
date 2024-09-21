@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\RoleType;
 use App\Events\UserActivationToggled;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Http\JsonResponse;
+use App\Exceptions\ApiException;
+use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\User;
 use App\Services\User\UserServiceInterface;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -29,8 +31,8 @@ class UserController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
-     * 
-     * @example: GET /api/users?search=john&role=student&active=true&created_after=2023-01-01&created_before=2023-12-31&sort_by=name&sort_direction=asc&per_page=20
+     *
+     * @example: GET /api/v1/users?search=john&role=student&active=true&created_after=2023-01-01&created_before=2023-12-31&sort_by=name&sort_direction=asc&per_page=20
      */
     public function index(Request $request): JsonResponse
     {
@@ -237,6 +239,36 @@ class UserController extends Controller
         }
     }
 
+    public function storeRole(StoreRoleRequest $request): JsonResponse
+    {
+        Log::info('Adding a new role', ['request' => $request->all()]);
+        try {
+            $role = $this->userService->addRole($request->validated());
+            Log::info('Role added successfully', ['role_id' => $role->id]);
+            return $this->successResponse($role, 'Role added successfully', 201);
+        } catch (ApiException $e) {
+            Log::error('Failed to add role', ['error' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            Log::error('Unexpected error while adding role', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Failed to add role', 500);
+        }
+    }
+
+    public function destroyRole(RoleType $role): JsonResponse
+    {
+        Log::info('Deleting role', ['role' => $role->value]);
+        try {
+            $this->userService->deleteRole($role);
+            Log::info('Role deleted successfully', ['role' => $role->value]);
+            return $this->successResponse(null, 'Role deleted successfully', 204);
+        } catch (Exception $e) {
+            Log::error('Failed to delete role', ['error' => $e->getMessage()]);
+            return $this->errorResponse('Failed to delete role', 500);
+        }
+    }
+
+    //TODO: Need to be fixed
     public function getUserStats(): JsonResponse
     {
         Log::info('Fetching user stats');

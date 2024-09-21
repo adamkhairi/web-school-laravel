@@ -8,6 +8,11 @@ use App\Models\Submission;
 use App\Policies\AssignmentPolicy;
 use App\Policies\EnrollmentPolicy;
 use App\Policies\SubmissionPolicy;
+use App\Repositories\Auth\AuthRepository;
+use App\Repositories\Auth\AuthRepositoryInterface;
+use App\Repositories\Notification\NotificationRepoInterface;
+use App\Repositories\Notification\NotificationRepository;
+use App\Repositories\Notification\NotificationRepositoryInterface;
 use App\Services\Assignment\AssignmentServiceInterface;
 use App\Services\Assignment\AssignmentService;
 use App\Services\Auth\AuthService;
@@ -48,7 +53,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Inject dependencies
+        // Repository Inject dependencies
+        $this->app->bind(NotificationRepoInterface::class, NotificationRepository::class);
+        $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
+   
+
+        // Services Inject dependencies
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(OAuthServiceInterface::class, OAuthService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);

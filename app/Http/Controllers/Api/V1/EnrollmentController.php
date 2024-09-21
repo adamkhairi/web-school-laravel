@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\EnrollmentStatus;
 use App\Events\EnrollmentStatusUpdated;
-use App\Models\Enrollment;
 use App\Models\Course;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Gate;
+use App\Models\Enrollment;
 use App\Services\Enrollment\EnrollmentServiceInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+
 class EnrollmentController extends Controller
 {
 
-    /* 
+    /*
       - Students can enroll in courses.
       - Enrollment requests are initially set to 'pending' status.
       - Administrators or teachers can approve or reject enrollment requests.
@@ -22,7 +23,7 @@ class EnrollmentController extends Controller
       - Teachers can view enrollments for their courses.
       - Students can withdraw from courses.
       - The system checks for course capacity before allowing new enrollments.
-      - Enrollment statistics are available for each course. 
+      - Enrollment statistics are available for each course.
       */
 
 

@@ -18,6 +18,12 @@ class Role extends Model
     protected $casts = [
         'name' => RoleType::class,
     ];
+
+    public static function create(array $validatedData)
+    {
+        return static::query()->create($validatedData);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class);

@@ -43,6 +43,7 @@ class Handler extends ExceptionHandler
         $response = [
             'success' => false,
             'message' => $message,
+            'status_code' => $statusCode, // Added status code to the response
         ];
 
         if ($exception instanceof ValidationException) {

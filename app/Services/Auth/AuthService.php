@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Enums\RoleType;
 use App\Exceptions\ApiException;
+use App\Repositories\Auth\AuthRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -19,6 +20,13 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
+    protected $authRepository;
+
+    public function __construct(AuthRepositoryInterface $authRepository)
+    {
+        $this->authRepository = $authRepository;
+    }
+
     public function login(Request $request): array
     {
         $key = 'login_attempts_' . $request->ip();
@@ -58,11 +66,16 @@ class AuthService implements AuthServiceInterface
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = User::create([
+        //$user = $this->authRepository->createUser($request->validated());
+        $user = $this->authRepository->createUser([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
         ]);
+
+        // Assign the Student role
+        $role = RoleType::Student;
+        $user->assignRole($role);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
@@ -80,13 +93,28 @@ class AuthService implements AuthServiceInterface
         Auth::user()->tokens()->delete();
     }
 
-    public function getUserData()
+    public function getUserData(Request $request)
     {
         $userData = Auth::user();
-        if (!$userData) {
+
+        if (is_null($userData)) {
             throw new ApiException('User not found', 404);
         }
-        return $userData;
+
+        // Fetch roles associated with the user
+        $roles = $userData->roles()->get()->pluck('name')->toArray(); // Changed from pluck to get then pluck
+
+        $token = $request->bearerToken();
+        $tokenType = 'Bearer';
+        $expiresIn = config('sanctum.expiration') * 60; // Assuming expiration is in seconds
+
+        return [
+            'user' => $userData,
+            'roles' => $roles,
+            'token' => $token,
+            'token_type' => $tokenType,
+            'expires_in' => $expiresIn,
+        ];
     }
 
     public function updateProfile(Request $request): User|null
@@ -96,6 +124,7 @@ class AuthService implements AuthServiceInterface
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
         ]);
+        $user = $this->authRepository->createUser($validatedData);
 
         $user->update($validatedData);
         return $user;

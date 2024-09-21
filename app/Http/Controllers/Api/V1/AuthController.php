@@ -1,20 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use App\Models\User;
 use App\Exceptions\ApiException;
+use App\Models\User;
 use App\Services\Auth\AuthServiceInterface;
 use App\Services\Auth\OAuthServiceInterface;
 use Exception;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -77,7 +74,7 @@ class AuthController extends Controller
     {
         Log::info('User data request');
         try {
-            $userData = $this->authService->getUserData();
+            $userData = $this->authService->getUserData($request);
             Log::info('User data retrieved', ['user' => $userData]);
             return $this->successResponse(['user' => $userData]);
         } catch (ApiException $e) {

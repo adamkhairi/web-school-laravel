@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Services\Notification\NotificationServiceInterface;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
@@ -18,8 +17,8 @@ class NotificationController extends Controller
      * event(new NewLessonCreated($lesson));
      *
      * This implementation provides a solid foundation for a notification system in your Laravel API project.
-     * You can expand on this by adding more notification types, implementing real-time notifications using WebSockets, 
-     * or integrating with external notification services as needed. 
+     * You can expand on this by adding more notification types, implementing real-time notifications using WebSockets,
+     * or integrating with external notification services as needed.
      *
      **/
 
