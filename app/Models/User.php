@@ -63,15 +63,15 @@ class User extends Authenticatable implements JWTSubject
 
     public function assignRole(RoleType $role): void
     {
-        if ($this->hasRole($role)) {
-            return; // Early return if the user already has the role
+        if (!$this->hasRole($role)) {
+            $roleModel = Role::where('name', $role->value)->first();
+
+            if (!$roleModel) {
+                throw new ApiException("Role '{$role->value}' not found.", 404);
+            }
+
+            $this->roles()->attach($roleModel->id);
         }
-
-        $roleModel = Role::where('name', $role->value)->firstOr(function () use ($role) {
-            throw new ApiException("Role '{$role->value}' not found.", 404);
-        });
-
-        $this->roles()->attach($roleModel->id);
     }
 
     public function enrollments()
